@@ -1,2 +1,2 @@
-# rohitKumarPattanayak.github.io
+# RohitKumarPattanayak.github.io
 This is my personal professional portfolio 
