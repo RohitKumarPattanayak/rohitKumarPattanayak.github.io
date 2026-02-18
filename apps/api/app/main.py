@@ -1,9 +1,11 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from app.routes import chat_route
 import uvicorn
 import os
 from app.core.database import engine, Base
 
+load_dotenv()
 app = FastAPI(title="Rohit AI Portfolio API")
 
 app.include_router(chat_route.router)
