@@ -85,3 +85,25 @@ class ResumeRepository:
         await self.session.commit()
         await self.session.refresh(chunk)
         return chunk
+
+
+    async def search_similar_chunks(
+        self,
+        query_embedding: list[float],
+        limit: int = 5
+    ):
+        active_resume = await self.get_active_resume()
+
+        if not active_resume:
+            return []
+
+        result = await self.session.execute(
+            select(ResumeChunkModel)
+            .where(ResumeChunkModel.resume_id == active_resume.id)
+            .order_by(
+                ResumeChunkModel.embedding.l2_distance(query_embedding) # semantic search is being performed here
+            )
+            .limit(limit)
+        )
+
+        return result.scalars().all()
