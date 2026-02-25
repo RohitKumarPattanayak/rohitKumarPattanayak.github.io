@@ -6,6 +6,8 @@ from sqlalchemy import select
 from openai import AsyncOpenAI
 import os
 from app.repositories.chat_repository import ChatRepository
+from app.services.intent_service import IntentService
+
 
 class ChatService:
 
@@ -16,10 +18,11 @@ class ChatService:
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY")
         )
+        self.intent_service = IntentService()
 
     async def generate_response(self, user_message: str):
 
-        intent = self._detect_intent(user_message)
+        intent = await self.intent_service.classify(user_message)
 
         # Structured path
         if intent == "list_projects":
@@ -57,19 +60,6 @@ class ChatService:
             "data": response.choices[0].message.content
         }
 
-
-    def _detect_intent(self, message: str) -> str:
-        message = message.lower()
-
-        if "list my projects" in message or "show my projects" in message:
-            return "list_projects"
-
-        if "skills" in message:
-            return "list_skills"
-
-        return "semantic_search"
-
-
     async def _list_projects(self):
         repo = ResumeRepository(self.session)
         active_resume = await repo.get_active_resume()
@@ -100,9 +90,9 @@ class ChatService:
             for p in projects
         ]
 
-    async def stream_response(self, user_message: str):
+    async def stream_response(self, user_message: str, mode: str = "candidate"):
 
-        intent = self._detect_intent(user_message)
+        intent = await self.intent_service.classify(user_message)
 
         if intent == "list_projects":
             projects = await self._list_projects()
@@ -120,7 +110,7 @@ class ChatService:
         messages = [
             {
                 "role": "system",
-                "content": "You are a professional AI assistant representing a software engineer."
+                "content": self._get_system_prompt(mode)
             },
             {
                 "role": "system",
@@ -155,3 +145,19 @@ class ChatService:
 
         await chat_repo.create_message("user", user_message)
         await chat_repo.create_message("assistant", full_response)
+
+    def _get_system_prompt(self, mode: str) -> str:
+
+        if mode == "recruiter":
+            return """
+    You are representing a senior software engineer to recruiters.
+    Respond confidently.
+    Focus on impact, scale, leadership, and measurable results.
+    Keep responses concise and business-oriented.
+    """
+
+        return """
+    You are representing a senior software engineer.
+    Respond with technical clarity.
+    Explain architecture decisions and implementation details when needed.
+    """
