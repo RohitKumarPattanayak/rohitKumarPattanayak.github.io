@@ -3,29 +3,31 @@ from openai import AsyncOpenAI
 import os
 import json
 from app.utils import constants
+from app.repositories.usage_repository import UsageRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class IntentService:
-
-    def __init__(self):
+    def __init__(self, session: AsyncSession):
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY")
         )
+        self.usage_repo = UsageRepository(self.session)
 
     async def classify(self, message: str) -> str:
 
         prompt = f"""
-Classify the user's intent.
+        Classify the user's intent.
 
-Return ONLY valid JSON in this format:
+        Return ONLY valid JSON in this format:
 
-{{
-  "intent": "list_projects | semantic_search | list_skills | list_experience"
-}}
+        {{
+        "intent": "list_projects | semantic_search | list_skills | list_experience"
+        }}
 
-User message:
-{message}
-"""
+        User message:
+        {message}
+        """
 
         response = await self.client.chat.completions.create(
             model="gpt-4o-mini",
@@ -52,6 +54,12 @@ User message:
             }
         )
 
+        await self.usage_repo.log_usage(
+            feature="intent-classification",
+            prompt_tokens=response.usage.prompt_tokens,
+            completion_tokens=response.usage.completion_tokens,
+            total_tokens=response.usage.total_tokens
+        )
         try:
             return response.choices[0].message.parsed["intent"]
         except Exception:

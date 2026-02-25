@@ -10,7 +10,7 @@ class VectorSearchService:
 
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.embedding_service = EmbeddingService()
+        self.embedding_service = EmbeddingService(session)
         self.resumeRepo = ResumeRepository(session)
 
     async def search(self, query: str, limit: int = 5):

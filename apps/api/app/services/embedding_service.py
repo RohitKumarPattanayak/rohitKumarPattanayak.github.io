@@ -2,6 +2,8 @@
 
 from openai import AsyncOpenAI
 import os
+from app.repositories.usage_repository import UsageRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class EmbeddingService:
@@ -10,10 +12,11 @@ class EmbeddingService:
     Encapsulates OpenAI embedding logic.
     """
 
-    def __init__(self):
+    def __init__(self, session: AsyncSession):
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY")
         )
+        self.usage_repo = UsageRepository(session)
 
     async def generate_embedding(self, text: str) -> list[float]:
         """
@@ -24,5 +27,10 @@ class EmbeddingService:
             model="text-embedding-3-small",
             input=text
         )
-
+        await self.usage_repo.log_usage(
+            feature="embedding-service",
+            prompt_tokens=response.usage.prompt_tokens,
+            completion_tokens=response.usage.completion_tokens,
+            total_tokens=response.usage.total_tokens
+        )
         return response.data[0].embedding

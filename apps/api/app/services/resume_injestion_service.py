@@ -8,8 +8,8 @@ class ResumeIngestionService:
     def __init__(self, session):
         self.session = session
         self.resumeRepo = ResumeRepository(session)
-        self.embedding_service = EmbeddingService()
-        self.parser_service = ResumeParserService()
+        self.embedding_service = EmbeddingService(session)
+        self.parser_service = ResumeParserService(session)
 
     async def upload_resume(self, name: str, raw_text: str):
 

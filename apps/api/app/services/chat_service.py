@@ -7,18 +7,21 @@ from openai import AsyncOpenAI
 import os
 from app.repositories.chat_repository import ChatRepository
 from app.services.intent_service import IntentService
+from app.repositories.usage_repository import UsageRepository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class ChatService:
 
-    def __init__(self, session):
+    def __init__(self, session: AsyncSession):
         self.session = session
-        self.embedding_service = EmbeddingService()
+        self.embedding_service = EmbeddingService(session)
         self.vector_service = VectorSearchService(session)
         self.client = AsyncOpenAI(
             api_key=os.getenv("OPENAI_API_KEY")
         )
-        self.intent_service = IntentService()
+        self.intent_service = IntentService(session)
+        self.usage_repo = UsageRepository(session)
 
     async def generate_response(self, user_message: str):
 
@@ -53,6 +56,13 @@ class ChatService:
                 }
             ],
             temperature=0.3
+        )
+
+        await self.usage_repo.log_usage(
+            feature="generate-response",
+            prompt_tokens=response.usage.prompt_tokens,
+            completion_tokens=response.usage.completion_tokens,
+            total_tokens=response.usage.total_tokens
         )
 
         return {
@@ -130,6 +140,13 @@ class ChatService:
             messages=messages,
             temperature=0.3,
             stream=True
+        )
+
+        await self.usage_repo.log_usage(
+            feature="stream-response",
+            prompt_tokens=stream.usage.prompt_tokens,
+            completion_tokens=stream.usage.completion_tokens,
+            total_tokens=stream.usage.total_tokens
         )
 
         full_response = ""
