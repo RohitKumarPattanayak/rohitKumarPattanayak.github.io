@@ -17,24 +17,27 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
         return []
 
     result = await db.execute(
-        select(ResumeChunkModel)
+        select(ResumeChunkModel.id,
+               ResumeChunkModel.meta_data)
         .where(
             ResumeChunkModel.resume_id == active_resume.id,
             ResumeChunkModel.section == "projects"
         )
     )
 
-    projects = result.scalars().all()
+    rows = result.all()
 
-    return [
-        {
-            "id": p.id,
-            "title": p.metadata.get("title"),
-            "company": p.metadata.get("company"),
-            "tech_stack": p.metadata.get("tech_stack")
-        }
-        for p in projects
-    ]
+    if len(rows):
+        return [
+            {
+                "id": row.id,
+                "title": row.meta_data.get("title"),
+                "company": row.meta_data.get("company"),
+                "tech_stack": row.meta_data.get("tech_stack"),
+            }
+            for row in rows
+        ]
+    return []
 
 
 @router.get("/{project_id}")
@@ -47,24 +50,22 @@ async def get_project(project_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No active resume found")
 
     result = await db.execute(
-        select(ResumeChunkModel)
+        select(ResumeChunkModel.id,
+               ResumeChunkModel.meta_data)
         .where(
             ResumeChunkModel.id == project_id,
             ResumeChunkModel.resume_id == active_resume.id,
             ResumeChunkModel.section == "projects"
         )
     )
-
-    project = result.scalar_one_or_none()
-
+    project = result.mappings().one_or_none()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-
     return {
         "id": project.id,
-        "title": project.metadata.get("title"),
-        "company": project.metadata.get("company"),
-        "tech_stack": project.metadata.get("tech_stack"),
-        "description": project.metadata.get("description"),
-        "impact": project.metadata.get("impact"),
+        "title": project.meta_data.get("title"),
+        "company": project.meta_data.get("company"),
+        "tech_stack": project.meta_data.get("tech_stack"),
+        "description": project.meta_data.get("description"),
+        "impact": project.meta_data.get("impact"),
     }
