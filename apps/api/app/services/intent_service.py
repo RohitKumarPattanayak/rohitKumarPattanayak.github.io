@@ -59,12 +59,7 @@ class IntentService:
             }
         )
 
-        await self.usage_repo.log_usage(
-            feature="intent-classification",
-            prompt_tokens=response.usage.prompt_tokens,
-            completion_tokens=response.usage.completion_tokens,
-            total_tokens=response.usage.total_tokens
-        )
+        await self.usage_repo.usage_track(response, "intent-classification")
         try:
             intent = response.choices[0].message.parsed["intent"]
             cache.set(cache_key, intent)

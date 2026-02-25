@@ -31,12 +31,7 @@ class EmbeddingService:
             input=text
         )
 
-        await self.usage_repo.log_usage(
-            feature="embedding-service",
-            prompt_tokens=response.usage.prompt_tokens,
-            completion_tokens=response.usage.completion_tokens,
-            total_tokens=response.usage.total_tokens
-        )
+        await self.usage_repo.usage_track(response, "embedding-service")
 
         embedding = response.data[0].embedding
         cache.set(cache, embedding)

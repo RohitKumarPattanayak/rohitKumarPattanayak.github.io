@@ -58,12 +58,7 @@ class ChatService:
             temperature=0.3
         )
 
-        await self.usage_repo.log_usage(
-            feature="generate-response",
-            prompt_tokens=response.usage.prompt_tokens,
-            completion_tokens=response.usage.completion_tokens,
-            total_tokens=response.usage.total_tokens
-        )
+        await self.usage_repo.usage_track(response, "generate-response")
 
         return {
             "type": "text",
@@ -142,12 +137,7 @@ class ChatService:
             stream=True
         )
 
-        await self.usage_repo.log_usage(
-            feature="stream-response",
-            prompt_tokens=stream.usage.prompt_tokens,
-            completion_tokens=stream.usage.completion_tokens,
-            total_tokens=stream.usage.total_tokens
-        )
+        await self.usage_repo.usage_track(stream, "stream-response")
 
         full_response = ""
 

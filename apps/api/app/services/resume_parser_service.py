@@ -16,7 +16,6 @@ class ResumeParserService:
         self.usage_repo = UsageRepository(session)
 
     async def parse_resume(self, raw_text: str) -> dict:
-
         prompt = f"""
             You are a resume parser.
 
@@ -49,7 +48,7 @@ class ResumeParserService:
                 {"role": "system", "content": "You extract structured resume data."},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0,  # Randomness
+            temperature=0,
             response_format={
                 "type": "json_schema",
                 "json_schema": {
@@ -74,21 +73,47 @@ class ResumeParserService:
                                     "required": constants.RESUME_PARSE_SECTION
                                 }
                             },
-                            "experience": {"type": "array"},
-                            "skills": {"type": "array"},
-                            "education": {"type": "array"}
+
+                            "experience": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "company": {"type": "string"},
+                                        "role": {"type": "string"},
+                                        "start_date": {"type": "string"},
+                                        "end_date": {"type": "string"},
+                                        "description": {"type": "string"}
+                                    }
+                                }
+                            },
+
+                            "skills": {
+                                "type": "array",
+                                "items": {"type": "string"}
+                            },
+
+                            "education": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "institution": {"type": "string"},
+                                        "degree": {"type": "string"},
+                                        "start_year": {"type": "string"},
+                                        "end_year": {"type": "string"}
+                                    }
+                                }
+                            }
                         },
                         "required": ["projects"]
                     }
                 }
-            }
-        )
+            })
 
-        await self.usage_repo.log_usage(
-            feature="parse-resume",
-            prompt_tokens=response.usage.prompt_tokens,
-            completion_tokens=response.usage.completion_tokens,
-            total_tokens=response.usage.total_tokens
-        )
+        await self.usage_repo.usage_track(response, "parse-resume")
 
-        return response.choices[0].message.parsed
+        content = response.choices[0].message.content
+        parsed_json = json.loads(content)
+
+        return parsed_json
