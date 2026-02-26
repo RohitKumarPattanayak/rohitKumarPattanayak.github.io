@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import uvicorn
 import os
 from app.core.database import engine, Base
-from app.routes import project_route, chat_route, resume_route, health_route, analytics_route
+from app.routes import project_route, chat_route, resume_route, health_route, analytics_route, test_route
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -14,6 +14,7 @@ app.include_router(resume_route.router)
 app.include_router(chat_route.router)
 app.include_router(project_route.router)
 app.include_router(analytics_route.router)
+app.include_router(test_route.router)
 
 app.add_middleware(
     CORSMiddleware,
