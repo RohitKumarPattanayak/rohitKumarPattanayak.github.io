@@ -17,27 +17,31 @@ class ResumeParserService:
         self.usage_repo = UsageRepository(session)
 
     async def parse_resume(self, user_text: str) -> dict:
-        prompt = TEMPLATE_FACTORY['resume_parser'].safe_substitute(
-            raw_text=user_text
-        )
-        response = await self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a strict resume parser. Extract structured resume data completely and accurately."
-                },
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0,
-            response_format=response_format_constants.PARSE_RESUME_RESPONSE_FORMAT
-        )
+        try:
+            prompt = TEMPLATE_FACTORY['resume_parser'].safe_substitute(
+                raw_text=user_text
+            )
+            response = await self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a strict resume parser. Extract structured resume data completely and accurately."
+                    },
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0,
+                response_format=response_format_constants.PARSE_RESUME_RESPONSE_FORMAT
+            )
 
-        await self.usage_repo.usage_track(response, "parse-resume")
+            await self.usage_repo.usage_track(response, "parse-resume")
 
-        content = response.choices[0].message.content
-        parsed_json = json.loads(content)
+            content = response.choices[0].message.content
+            parsed_json = json.loads(content)
 
-        logger.info("parse_resume - Resume parsed successfully")
+            logger.info("parse_resume - Resume parsed successfully")
 
-        return parsed_json
+            return parsed_json
+        except Exception as e:
+            logger.error("parse_resume - Error occurred", exc_info=True)
+            raise

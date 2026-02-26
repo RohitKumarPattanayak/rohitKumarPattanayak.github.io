@@ -10,9 +10,13 @@ router = APIRouter(prefix="/test", tags=["test"])
 
 @router.get("/")
 async def test(db: AsyncSession = Depends(get_db)):
-    testService = ResumeParserService(db)
-    result = await testService.parse_resume("rohit")
+    try:
+        testService = ResumeParserService(db)
+        result = await testService.parse_resume("rohit")
 
-    logger.info("test - Test endpoint executed successfully")
+        logger.info("test - Test endpoint executed successfully")
 
-    return result
+        return result
+    except Exception as e:
+        logger.error("test - Error occurred", exc_info=True)
+        raise

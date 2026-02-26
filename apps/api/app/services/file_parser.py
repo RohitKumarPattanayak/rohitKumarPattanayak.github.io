@@ -15,17 +15,21 @@ class FileParserService:
         }
 
     def parse(self, filename: str, content: bytes) -> str:
-        extension = self._get_extension(filename)
-        parser = self.parsers.get(extension)
-        if not parser:
-            raise HTTPException(
-                status_code=400, detail="Unsupported file type")
+        try:
+            extension = self._get_extension(filename)
+            parser = self.parsers.get(extension)
+            if not parser:
+                raise HTTPException(
+                    status_code=400, detail="Unsupported file type")
 
-        result = parser(content)
+            result = parser(content)
 
-        logger.info("parse - File parsed successfully")
+            logger.info("parse - File parsed successfully")
 
-        return result
+            return result
+        except Exception as e:
+            logger.error("parse - Error occurred", exc_info=True)
+            raise
 
     def _get_extension(self, filename: str) -> str:
         return filename.lower().split(".")[-1]

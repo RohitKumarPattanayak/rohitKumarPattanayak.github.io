@@ -19,17 +19,21 @@ class VectorSearchService:
         Perform semantic search over active resume chunks.
         """
 
-        # 1️⃣ Generate query embedding
-        query_embedding = await self.embedding_service.generate_embedding(query)
+        try:
+            # 1️⃣ Generate query embedding
+            query_embedding = await self.embedding_service.generate_embedding(query)
 
-        # 2️⃣ Search similar chunks from DB
-        chunks = await self.resumeRepo.search_similar_chunks(
-            query_embedding=query_embedding,
-            limit=limit
-        )
+            # 2️⃣ Search similar chunks from DB
+            chunks = await self.resumeRepo.search_similar_chunks(
+                query_embedding=query_embedding,
+                limit=limit
+            )
 
-        results = [chunk.content for chunk in chunks]
+            results = [chunk.content for chunk in chunks]
 
-        logger.info("search - Vector search completed successfully")
+            logger.info("search - Vector search completed successfully")
 
-        return results
+            return results
+        except Exception as e:
+            logger.error("search - Error occurred in VectorSearchService", exc_info=True)
+            raise

@@ -17,58 +17,62 @@ class IntentService:
         self.usage_repo = UsageRepository(self.session)
 
     async def classify(self, message: str) -> str:
-        cache_key = f"intent:{message}"
-        prompt = f"""
-        Classify the user's intent.
+        try:
+            cache_key = f"intent:{message}"
+            prompt = f"""
+            Classify the user's intent.
 
-        Return ONLY valid JSON in this format:
+            Return ONLY valid JSON in this format:
 
-        {{
-        "intent": "list_projects | semantic_search | list_skills | list_experience"
-        }}
+            {{
+            "intent": "list_projects | semantic_search | list_skills | list_experience"
+            }}
 
-        User message:
-        {message}
-        """
+            User message:
+            {message}
+            """
 
-        cached = cache.get(cache_key)
-        if cached:
-            logger.info("classify - Intent fetched from cache successfully")
-            return cached
+            cached = cache.get(cache_key)
+            if cached:
+                logger.info("classify - Intent fetched from cache successfully")
+                return cached
 
-        response = await self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You classify user intents."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0,
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "intent_classification",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "intent": {
-                                "type": "string",
-                                "enum": constants.SEGREGATION_ARR
-                            }
-                        },
-                        "required": ["intent"]
+            response = await self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You classify user intents."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": "intent_classification",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "intent": {
+                                    "type": "string",
+                                    "enum": constants.SEGREGATION_ARR
+                                }
+                            },
+                            "required": ["intent"]
+                        }
                     }
                 }
-            }
-        )
+            )
 
-        await self.usage_repo.usage_track(response, "intent-classification")
-        try:
-            intent = response.choices[0].message.parsed["intent"]
-            cache.set(cache_key, intent)
+            await self.usage_repo.usage_track(response, "intent-classification")
+            try:
+                intent = response.choices[0].message.parsed["intent"]
+                cache.set(cache_key, intent)
 
-            logger.info("classify - Intent classified successfully")
+                logger.info("classify - Intent classified successfully")
 
-            return intent
-        except Exception:
-            logger.info("classify - Intent classification failed, defaulting to semantic_search - success")
-            return "semantic_search"
+                return intent
+            except Exception:
+                logger.info("classify - Intent classification failed, defaulting to semantic_search - success")
+                return "semantic_search"
+        except Exception as e:
+            logger.error("classify - Error occurred", exc_info=True)
+            raise

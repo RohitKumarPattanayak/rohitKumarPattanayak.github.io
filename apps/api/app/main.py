@@ -32,16 +32,24 @@ app.add_middleware(
 
 @app.get("/")
 def root():
-    logger.info("root - Root endpoint hit successfully")
-    return {"message": "AI Portfolio API Running"}
+    try:
+        logger.info("root - Root endpoint hit successfully")
+        return {"message": "AI Portfolio API Running"}
+    except Exception as e:
+        logger.error("root - Error occurred", exc_info=True)
+        raise
 
 
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
-    logger.info("startup - Database tables created successfully")
+        logger.info("startup - Database tables created successfully")
+    except Exception as e:
+        logger.error("startup - Error occurred", exc_info=True)
+        raise
 
 
 if __name__ == "__main__":

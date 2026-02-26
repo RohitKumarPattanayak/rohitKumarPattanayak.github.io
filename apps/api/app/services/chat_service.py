@@ -26,148 +26,160 @@ class ChatService:
 
     async def generate_response(self, user_message: str):
 
-        intent = await self.intent_service.classify(user_message)
+        try:
+            intent = await self.intent_service.classify(user_message)
 
-        # Structured path
-        if intent == "list_projects":
-            data = await self._list_projects()
-            logger.info("generate_response - Projects list response generated successfully")
-            return {
-                "type": "projects_list",
-                "data": data
+            # Structured path
+            if intent == "list_projects":
+                data = await self._list_projects()
+                logger.info("generate_response - Projects list response generated successfully")
+                return {
+                    "type": "projects_list",
+                    "data": data
+                }
+
+            # Semantic path
+            relevant_chunks = await self.vector_service.search(user_message)
+
+            context_text = "\n\n".join(relevant_chunks)
+
+            response = await self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a professional AI assistant representing a software engineer."
+                    },
+                    {
+                        "role": "system",
+                        "content": f"Relevant Resume Context:\n{context_text}"
+                    },
+                    {
+                        "role": "user",
+                        "content": user_message
+                    }
+                ],
+                temperature=0.3
+            )
+
+            await self.usage_repo.usage_track(response, "generate-response")
+
+            result = {
+                "type": "text",
+                "data": response.choices[0].message.content
             }
 
-        # Semantic path
-        relevant_chunks = await self.vector_service.search(user_message)
+            logger.info("generate_response - Text response generated successfully")
 
-        context_text = "\n\n".join(relevant_chunks)
+            return result
+        except Exception as e:
+            logger.error("generate_response - Error occurred", exc_info=True)
+            raise
 
-        response = await self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
+    async def _list_projects(self):
+        try:
+            repo = ResumeRepository(self.session)
+            active_resume = await repo.get_active_resume()
+
+            if not active_resume:
+                logger.info("_list_projects - No active resume found, returning message - success")
+                return "No active resume found."
+
+            result = await self.session.execute(
+                select(ResumeChunkModel)
+                .where(
+                    ResumeChunkModel.resume_id == active_resume.id,
+                    ResumeChunkModel.section == "projects"
+                )
+            )
+
+            projects = result.scalars().all()
+
+            if not projects:
+                logger.info("_list_projects - No projects found, returning message - success")
+                return "No projects found."
+
+            projects_data = [
+                {
+                    "id": p.id,
+                    "title": p.meta_data.get("title"),
+                    "company": p.meta_data.get("company"),
+                    "tech_stack": p.meta_data.get("tech_stack"),
+                }
+                for p in projects
+            ]
+
+            logger.info("_list_projects - Projects listed successfully")
+
+            return projects_data
+        except Exception as e:
+            logger.error("_list_projects - Error occurred", exc_info=True)
+            raise
+
+    async def stream_response(self, user_message: str, mode: str = "candidate"):
+
+        try:
+            intent = await self.intent_service.classify(user_message)
+
+            if intent == "list_projects":
+                projects = await self._list_projects()
+                logger.info("stream_response - Projects list stream generated successfully")
+                yield str({
+                    "type": "projects_list",
+                    "data": projects
+                })
+                return
+
+            history = await self._get_recent_history()
+            relevant_chunks = await self.vector_service.search(user_message)
+
+            context_text = "\n\n".join(relevant_chunks)
+
+            messages = [
                 {
                     "role": "system",
-                    "content": "You are a professional AI assistant representing a software engineer."
+                    "content": self._get_system_prompt(mode)
                 },
                 {
                     "role": "system",
                     "content": f"Relevant Resume Context:\n{context_text}"
-                },
-                {
-                    "role": "user",
-                    "content": user_message
                 }
-            ],
-            temperature=0.3
-        )
+            ]
 
-        await self.usage_repo.usage_track(response, "generate-response")
+            messages.extend(history)
 
-        result = {
-            "type": "text",
-            "data": response.choices[0].message.content
-        }
-
-        logger.info("generate_response - Text response generated successfully")
-
-        return result
-
-    async def _list_projects(self):
-        repo = ResumeRepository(self.session)
-        active_resume = await repo.get_active_resume()
-
-        if not active_resume:
-            logger.info("_list_projects - No active resume found, returning message - success")
-            return "No active resume found."
-
-        result = await self.session.execute(
-            select(ResumeChunkModel)
-            .where(
-                ResumeChunkModel.resume_id == active_resume.id,
-                ResumeChunkModel.section == "projects"
-            )
-        )
-
-        projects = result.scalars().all()
-
-        if not projects:
-            logger.info("_list_projects - No projects found, returning message - success")
-            return "No projects found."
-
-        projects_data = [
-            {
-                "id": p.id,
-                "title": p.meta_data.get("title"),
-                "company": p.meta_data.get("company"),
-                "tech_stack": p.meta_data.get("tech_stack"),
-            }
-            for p in projects
-        ]
-
-        logger.info("_list_projects - Projects listed successfully")
-
-        return projects_data
-
-    async def stream_response(self, user_message: str, mode: str = "candidate"):
-
-        intent = await self.intent_service.classify(user_message)
-
-        if intent == "list_projects":
-            projects = await self._list_projects()
-            logger.info("stream_response - Projects list stream generated successfully")
-            yield str({
-                "type": "projects_list",
-                "data": projects
+            messages.append({
+                "role": "user",
+                "content": user_message
             })
-            return
 
-        history = await self._get_recent_history()
-        relevant_chunks = await self.vector_service.search(user_message)
+            stream = await self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                temperature=0.3,
+                stream=True
+            )
 
-        context_text = "\n\n".join(relevant_chunks)
+            await self.usage_repo.usage_track(stream, "stream-response")
 
-        messages = [
-            {
-                "role": "system",
-                "content": self._get_system_prompt(mode)
-            },
-            {
-                "role": "system",
-                "content": f"Relevant Resume Context:\n{context_text}"
-            }
-        ]
+            logger.info("stream_response - Streaming response created successfully")
 
-        messages.extend(history)
+            full_response = ""
 
-        messages.append({
-            "role": "user",
-            "content": user_message
-        })
+            async for chunk in stream:
+                if chunk.choices[0].delta.content:
+                    token = chunk.choices[0].delta.content
+                    full_response += token
+                    yield token
 
-        stream = await self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            temperature=0.3,
-            stream=True
-        )
+            # store conversation after completion
+            chat_repo = ChatRepository(self.session)
 
-        await self.usage_repo.usage_track(stream, "stream-response")
-
-        logger.info("stream_response - Streaming response created successfully")
-
-        full_response = ""
-
-        async for chunk in stream:
-            if chunk.choices[0].delta.content:
-                token = chunk.choices[0].delta.content
-                full_response += token
-                yield token
-
-        # store conversation after completion
-        chat_repo = ChatRepository(self.session)
-
-        await chat_repo.create_message("user", user_message)
-        await chat_repo.create_message("assistant", full_response)
+            await chat_repo.create_message("user", user_message)
+            await chat_repo.create_message("assistant", full_response)
+        except Exception as e:
+            logger.error("stream_response - Error occurred", exc_info=True)
+            raise
 
     def _get_system_prompt(self, mode: str) -> str:
 

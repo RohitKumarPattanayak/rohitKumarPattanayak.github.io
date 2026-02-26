@@ -6,5 +6,9 @@ router = APIRouter(tags=["Health"])
 
 @router.get("/health")
 async def health():
-    logger.info("health - Health check successful")
-    return {"status": "ok"}
+    try:
+        logger.info("health - Health check successful")
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error("health - Error occurred", exc_info=True)
+        raise

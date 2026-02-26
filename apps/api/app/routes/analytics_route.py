@@ -11,18 +11,22 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 @router.get("/usage")
 async def usage_summary(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(
-            AIUsageModel.feature,
-            func.sum(AIUsageModel.total_tokens)
-        ).group_by(AIUsageModel.AIUsageModel)
-    )
+    try:
+        result = await db.execute(
+            select(
+                AIUsageModel.feature,
+                func.sum(AIUsageModel.total_tokens)
+            ).group_by(AIUsageModel.AIUsageModel)
+        )
 
-    data = result.all()
+        data = result.all()
 
-    logger.info("usage_summary - Usage summary fetched successfully")
+        logger.info("usage_summary - Usage summary fetched successfully")
 
-    return data
+        return data
+    except Exception as e:
+        logger.error("usage_summary - Error occurred", exc_info=True)
+        raise
 
 
 # @router.get("/recruiter")

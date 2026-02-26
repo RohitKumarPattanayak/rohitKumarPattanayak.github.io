@@ -21,23 +21,28 @@ class EmbeddingService:
         self.usage_repo = UsageRepository(session)
 
     async def generate_embedding(self, text: str) -> list[float]:
-        cache_key = f"embedding:{text}"
+        try:
+            cache_key = f"embedding:{text}"
 
-        cached = cache.get(cache_key)
-        if cached:
-            logger.info("generate_embedding - Embedding fetched from cache successfully")
-            return cached
+            cached = cache.get(cache_key)
+            if cached:
+                logger.info(
+                    "generate_embedding - Embedding fetched from cache successfully")
+                return cached
 
-        response = await self.client.embeddings.create(
-            model="text-embedding-3-small",
-            input=text
-        )
+            response = await self.client.embeddings.create(
+                model="text-embedding-3-small",
+                input=text
+            )
 
-        await self.usage_repo.usage_track(response, "embedding-service")
+            await self.usage_repo.usage_track(response, "embedding-service")
 
-        embedding = response.data[0].embedding
-        cache.set(cache, embedding)
+            embedding = response.data[0].embedding
+            cache.set(cache, embedding)
 
-        logger.info("generate_embedding - Embedding generated and cached successfully")
+            # logger.info("generate_embedding - Embedding generated and cached successfully")
 
-        return embedding
+            return embedding
+        except Exception as e:
+            logger.error("generate_embedding - Error occurred", exc_info=True)
+            raise
