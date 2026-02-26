@@ -1,8 +1,8 @@
-from tkinter import constants
 from openai import AsyncOpenAI
 import os
 import json
-from app.utils import constants
+from app.utils import response_format_constants
+from app.utils.prompt_templates import TEMPLATE_FACTORY
 from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,101 +15,22 @@ class ResumeParserService:
         )
         self.usage_repo = UsageRepository(session)
 
-    async def parse_resume(self, raw_text: str) -> dict:
-        prompt = f"""
-            You are a resume parser.
-
-            Extract structured JSON from the resume text.
-
-            Return ONLY valid JSON with this structure:
-
-            {{
-            "projects": [
-                {{
-                "title": "",
-                "company": "",
-                "tech_stack": [],
-                "description": "",
-                "impact": ""
-                }}
-            ],
-            "experience": [],
-            "skills": [],
-            "education": []
-            }}
-
-            Resume Text:
-            {raw_text}
-            """
-
+    async def parse_resume(self, user_text: str) -> dict:
+        prompt = TEMPLATE_FACTORY['resume_parser'].safe_substitute(
+            raw_text=user_text
+        )
         response = await self.client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You extract structured resume data."},
+                {
+                    "role": "system",
+                    "content": "You are a strict resume parser. Extract structured resume data completely and accurately."
+                },
                 {"role": "user", "content": prompt}
             ],
             temperature=0,
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": "resume_structure",
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "projects": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "title": {"type": "string"},
-                                        "company": {"type": "string"},
-                                        "tech_stack": {
-                                            "type": "array",
-                                            "items": {"type": "string"}
-                                        },
-                                        "description": {"type": "string"},
-                                        "impact": {"type": "string"}
-                                    },
-                                    "required": constants.RESUME_PARSE_SECTION
-                                }
-                            },
-
-                            "experience": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "company": {"type": "string"},
-                                        "role": {"type": "string"},
-                                        "start_date": {"type": "string"},
-                                        "end_date": {"type": "string"},
-                                        "description": {"type": "string"}
-                                    }
-                                }
-                            },
-
-                            "skills": {
-                                "type": "array",
-                                "items": {"type": "string"}
-                            },
-
-                            "education": {
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "institution": {"type": "string"},
-                                        "degree": {"type": "string"},
-                                        "start_year": {"type": "string"},
-                                        "end_year": {"type": "string"}
-                                    }
-                                }
-                            }
-                        },
-                        "required": ["projects"]
-                    }
-                }
-            })
+            response_format=response_format_constants.PARSE_RESUME_RESPONSE_FORMAT
+        )
 
         await self.usage_repo.usage_track(response, "parse-resume")
 
