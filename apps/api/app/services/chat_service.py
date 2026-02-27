@@ -1,3 +1,4 @@
+from warnings import deprecated
 from app.services.embedding_service import EmbeddingService
 from app.services.vector_search_service import VectorSearchService
 from app.repositories.resume_repository import ResumeRepository
@@ -24,65 +25,57 @@ class ChatService:
         self.intent_service = IntentService(session)
         self.usage_repo = UsageRepository(session)
 
-    async def generate_response(self, user_message: str):
-
-        try:
-            intent = await self.intent_service.classify(user_message)
-
-            # Structured path
-            if intent == "list_projects":
-                data = await self._list_projects()
-                logger.info("generate_response - Projects list response generated successfully")
-                return {
-                    "type": "projects_list",
-                    "data": data
-                }
-
-            # Semantic path
-            relevant_chunks = await self.vector_service.search(user_message)
-
-            context_text = "\n\n".join(relevant_chunks)
-
-            response = await self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a professional AI assistant representing a software engineer."
-                    },
-                    {
-                        "role": "system",
-                        "content": f"Relevant Resume Context:\n{context_text}"
-                    },
-                    {
-                        "role": "user",
-                        "content": user_message
-                    }
-                ],
-                temperature=0.3
-            )
-
-            await self.usage_repo.usage_track(response, "generate-response")
-
-            result = {
-                "type": "text",
-                "data": response.choices[0].message.content
-            }
-
-            logger.info("generate_response - Text response generated successfully")
-
-            return result
-        except Exception as e:
-            logger.error("generate_response - Error occurred", exc_info=True)
-            raise
-
+    # @deprecated
+    # async def generate_response(self, user_message: str):
+    #     try:
+    #         intent = await self.intent_service.classify(user_message)
+    #         # Structured path
+    #         if intent == "list_projects":
+    #             data = await self._list_projects()
+    #             logger.info("generate_response - Projects list response generated successfully")
+    #             return {
+    #                 "type": "projects_list",
+    #                 "data": data
+    #             }
+    #         # Semantic path
+    #         relevant_chunks = await self.vector_service.search(user_message)
+    #         context_text = "\n\n".join(relevant_chunks)
+    #         response = await self.client.chat.completions.create(
+    #             model="gpt-4o-mini",
+    #             messages=[
+    #                 {
+    #                     "role": "system",
+    #                     "content": "You are a professional AI assistant representing a software engineer."
+    #                 },
+    #                 {
+    #                     "role": "system",
+    #                     "content": f"Relevant Resume Context:\n{context_text}"
+    #                 },
+    #                 {
+    #                     "role": "user",
+    #                     "content": user_message
+    #                 }
+    #             ],
+    #             temperature=0.3
+    #         )
+    #         await self.usage_repo.usage_track(response, "generate-response")
+    #         result = {
+    #             "type": "text",
+    #             "data": response.choices[0].message.content
+    #         }
+    #         logger.info("generate_response - Text response generated successfully")
+    #         return result
+    #     except Exception as e:
+    #         logger.error("generate_response - Error occurred", exc_info=True)
+    #         raise
     async def _list_projects(self):
         try:
             repo = ResumeRepository(self.session)
             active_resume = await repo.get_active_resume()
 
             if not active_resume:
-                logger.info("_list_projects - No active resume found, returning message - success")
+                logger.info(
+                    "_list_projects - No active resume found, returning message - success")
                 return "No active resume found."
 
             result = await self.session.execute(
@@ -96,7 +89,8 @@ class ChatService:
             projects = result.scalars().all()
 
             if not projects:
-                logger.info("_list_projects - No projects found, returning message - success")
+                logger.info(
+                    "_list_projects - No projects found, returning message - success")
                 return "No projects found."
 
             projects_data = [
@@ -123,7 +117,8 @@ class ChatService:
 
             if intent == "list_projects":
                 projects = await self._list_projects()
-                logger.info("stream_response - Projects list stream generated successfully")
+                logger.info(
+                    "stream_response - Projects list stream generated successfully")
                 yield str({
                     "type": "projects_list",
                     "data": projects
@@ -162,7 +157,8 @@ class ChatService:
 
             await self.usage_repo.usage_track(stream, "stream-response")
 
-            logger.info("stream_response - Streaming response created successfully")
+            logger.info(
+                "stream_response - Streaming response created successfully")
 
             full_response = ""
 

@@ -1,7 +1,6 @@
 from tkinter import constants
 from openai import AsyncOpenAI
 import os
-import json
 from app.utils import constants
 from app.repositories.usage_repository import UsageRepository
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,7 +33,8 @@ class IntentService:
 
             cached = cache.get(cache_key)
             if cached:
-                logger.info("classify - Intent fetched from cache successfully")
+                logger.info(
+                    "classify - Intent fetched from cache successfully")
                 return cached
 
             response = await self.client.chat.completions.create(
@@ -71,7 +71,8 @@ class IntentService:
 
                 return intent
             except Exception:
-                logger.info("classify - Intent classification failed, defaulting to semantic_search - success")
+                logger.info(
+                    "classify - Intent classification failed, defaulting to semantic_search - success")
                 return "semantic_search"
         except Exception as e:
             logger.error("classify - Error occurred", exc_info=True)
