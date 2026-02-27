@@ -1,3 +1,4 @@
+from app.middleware.basic_auth_middleware import AuthMiddleware
 from dotenv import load_dotenv
 from fastapi import FastAPI
 import uvicorn
@@ -18,6 +19,9 @@ app.include_router(project_route.router)
 app.include_router(analytics_route.router)
 app.include_router(test_route.router)
 app.include_router(user_route.router)
+
+
+app.add_middleware(AuthMiddleware)
 
 # First add logging middleware
 app.add_middleware(LoggingMiddleware)

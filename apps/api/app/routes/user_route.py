@@ -1,8 +1,6 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter, Depends, Request
 from app.core.logger import logger
-from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
 from app.core.dependencies import get_db
 from app.core.logger import logger
 from app.models.schema.user_schema import UserMode, UserResponse, CreateUserRequest
@@ -34,7 +32,12 @@ async def create_user(request: CreateUserRequest, session: AsyncSession = Depend
 
 
 @router.patch("/mode", response_model=UserResponse)
-async def update_mode(user_id: int, mode: UserMode, session: AsyncSession = Depends(get_db)):
+async def update_mode(
+    request: Request,
+    user_id: int,
+    mode: UserMode,
+    session: AsyncSession = Depends(get_db)
+):
     try:
         service = UserService(session)
 

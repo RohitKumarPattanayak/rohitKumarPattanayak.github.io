@@ -164,8 +164,8 @@ class ChatService:
                     token = chunk.choices[0].delta.content
                     full_response += token
                     yield token
-            await self.chat_repo.create_message("user", user_message)
-            await self.chat_repo.create_message("assistant", full_response)
+            await self.chat_repo.create_message(user_id, "user", user_message, mode)
+            await self.chat_repo.create_message(user_id, "assistant", full_response, mode)
         except Exception as e:
             logger.error("stream_response - Error occurred", exc_info=True)
             raise

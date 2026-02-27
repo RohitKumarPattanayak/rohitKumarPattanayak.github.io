@@ -2,20 +2,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.chat_model import ChatMessageModel
 from app.core.logger import logger
+from app.repositories.resume_repository import ResumeRepository
 
 
 class ChatRepository:
 
     def __init__(self, session: AsyncSession):
         self.session = session
+        self.resume_repo = ResumeRepository(session)
 
     async def create_message(self, user_id: int, role: str, message: str, mode):
         try:
+            resume = self.resume_repo.get_active_resume()
             chat_message = ChatMessageModel(
                 user_id=user_id,
                 role=role,
                 message=message,
-                mode=mode
+                mode=mode,
+                resume_id=resume.id
             )
             self.session.add(chat_message)
             await self.session.commit()

@@ -12,4 +12,5 @@ class ChatMessageModel(Base):
     role = Column(String, nullable=False)
     message = Column(Text, nullable=False)
     mode = Column(Enum(UserMode), nullable=False)
+    resume_id = Column(Integer, ForeignKey("resumes.id", ondelete="CASCADE"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
