@@ -20,7 +20,7 @@ class VectorSearchService:
             query_embedding = await self.embedding_service.generate_embedding(query)
 
             # Search similar chunks from DB
-            chunks = await self.resumeRepo.search_similar_chunks(
+            chunks = await self.resumeRepo.search_similar_chunks_v2(
                 query_embedding=query_embedding,
                 limit=limit
             )

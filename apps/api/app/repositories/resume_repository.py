@@ -4,7 +4,6 @@ from sqlalchemy import select, update
 from app.models.resume_model import ResumeModel
 from sqlalchemy.exc import IntegrityError
 from app.models.resume_chunk_model import ResumeChunkModel
-from sqlalchemy import update
 
 
 class ResumeRepository:
@@ -102,9 +101,38 @@ class ResumeRepository:
             .where(ResumeChunkModel.resume_id == active_resume.id)
             .order_by(
                 # semantic search is being performed here
-                ResumeChunkModel.embedding.l2_distance(query_embedding)
+                ResumeChunkModel.embedding.cosine_distance(query_embedding)
             )
             .limit(limit)
         )
 
         return result.scalars().all()
+
+    async def search_similar_chunks_v2(
+        self,
+        query_embedding: list[float],
+        limit: int = 5
+    ):
+        active_resume = await self.get_active_resume()
+        if not active_resume:
+            return []
+        result = await self.session.execute(
+            select(
+                ResumeChunkModel,
+                ResumeChunkModel.embedding
+                .cosine_distance(query_embedding)
+                .label("distance")
+            )
+            .where(
+                ResumeChunkModel.resume_id == active_resume.id
+            )
+            .order_by("distance")
+            .limit(limit)
+        )
+        rows = result.all()
+        SIMILARITY_THRESHOLD = 0.35
+        return [
+            row[0]
+            for row in rows
+            if row[1] < SIMILARITY_THRESHOLD
+        ]
