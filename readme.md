@@ -44,6 +44,12 @@ CREATE EXTENSION IF NOT EXISTS vector;
 \dx --> verify
 
 
+What Is HNSW Index?
+   HNSW = Hierarchical Navigable Small World
+   It is a graph-based Approximate Nearest Neighbor (ANN) algorithm used for fast vector similarity search.
+   In simple terms:
+   It allows you to find the most similar vectors very fast, without scanning every row in the table.
+
 
 
 
