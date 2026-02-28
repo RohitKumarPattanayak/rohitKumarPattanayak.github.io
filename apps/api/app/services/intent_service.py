@@ -1,4 +1,3 @@
-from tkinter import constants
 from openai import AsyncOpenAI
 import os
 from app.utils import constants
@@ -7,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.cache import cache
 from app.core.logger import logger
 import json
+from app.utils.prompt_templates import TEMPLATE_FACTORY
+from app.utils import response_format_constants
 
 
 class IntentService:
@@ -21,18 +22,9 @@ class IntentService:
     async def classify(self, message: str) -> str:
         try:
             cache_key = f"intent:{message}"
-            prompt = f"""
-            Classify the user's intent.
-
-            Return ONLY valid JSON in this format:
-
-            {{
-            "intent": "list_projects | semantic_search | list_skills | list_experience"
-            }}
-
-            User message:
-            {message}
-            """
+            prompt = TEMPLATE_FACTORY['intent_clsify'].safe_substitute(
+                message=message
+            )
 
             cached = cache.get(cache_key)
             if cached:
@@ -47,22 +39,7 @@ class IntentService:
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0,
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "intent_classification",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "intent": {
-                                    "type": "string",
-                                    "enum": constants.SEGREGATION_ARR
-                                }
-                            },
-                            "required": ["intent"]
-                        }
-                    }
-                }
+                response_format=response_format_constants.INTENT_CLASIFY_RESPONSE_FORMAT
             )
 
             await self.usage_repo.usage_track(response, "intent-classification")

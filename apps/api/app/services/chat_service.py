@@ -27,49 +27,6 @@ class ChatService:
         self.usage_repo = UsageRepository(session)
         self.chat_repo = ChatRepository(session)
 
-    # @deprecated
-    # async def generate_response(self, user_message: str):
-    #     try:
-    #         intent = await self.intent_service.classify(user_message)
-    #         # Structured path
-    #         if intent == "list_projects":
-    #             data = await self._list_projects()
-    #             logger.info("generate_response - Projects list response generated successfully")
-    #             return {
-    #                 "type": "projects_list",
-    #                 "data": data
-    #             }
-    #         # Semantic path
-    #         relevant_chunks = await self.vector_service.search(user_message)
-    #         context_text = "\n\n".join(relevant_chunks)
-    #         response = await self.client.chat.completions.create(
-    #             model=self.model,
-    #             messages=[
-    #                 {
-    #                     "role": "system",
-    #                     "content": "You are a professional AI assistant representing a software engineer."
-    #                 },
-    #                 {
-    #                     "role": "system",
-    #                     "content": f"Relevant Resume Context:\n{context_text}"
-    #                 },
-    #                 {
-    #                     "role": "user",
-    #                     "content": user_message
-    #                 }
-    #             ],
-    #             temperature=0.3
-    #         )
-    #         await self.usage_repo.usage_track(response, "generate-response")
-    #         result = {
-    #             "type": "text",
-    #             "data": response.choices[0].message.content
-    #         }
-    #         logger.info("generate_response - Text response generated successfully")
-    #         return result
-    #     except Exception as e:
-    #         logger.error("generate_response - Error occurred", exc_info=True)
-    #         raise
     async def _list_projects(self):
         try:
             repo = ResumeRepository(self.session)
@@ -112,6 +69,139 @@ class ChatService:
             logger.error("_list_projects - Error occurred", exc_info=True)
             raise
 
+    async def _list_experience(self):
+        try:
+            repo = ResumeRepository(self.session)
+            active_resume = await repo.get_active_resume()
+
+            if not active_resume:
+                logger.info(
+                    "_list_experience - No active resume found, returning message - success")
+                return "No active resume found."
+
+            result = await self.session.execute(
+                select(ResumeChunkModel)
+                .where(
+                    ResumeChunkModel.resume_id == active_resume.id,
+                    ResumeChunkModel.section == "experience"
+                )
+            )
+
+            experiences = result.scalars().all()
+
+            if not experiences:
+                logger.info(
+                    "_list_experience - No experience found, returning message - success")
+                return "No experience found."
+
+            experience_data = [
+                {
+                    "id": e.id,
+                    "company": e.meta_data.get("company"),
+                    "role": e.meta_data.get("role"),
+                    "start_date": e.meta_data.get("start_date"),
+                    "end_date": e.meta_data.get("end_date"),
+                    "description": e.meta_data.get("description"),
+                }
+                for e in experiences
+            ]
+
+            logger.info("_list_experience - Experience listed successfully")
+
+            return experience_data
+        except Exception as e:
+            logger.error("_list_experience - Error occurred", exc_info=True)
+            raise
+
+    async def _list_education(self):
+        try:
+            repo = ResumeRepository(self.session)
+            active_resume = await repo.get_active_resume()
+
+            if not active_resume:
+                logger.info(
+                    "_list_education - No active resume found, returning message - success")
+                return "No active resume found."
+
+            result = await self.session.execute(
+                select(ResumeChunkModel)
+                .where(
+                    ResumeChunkModel.resume_id == active_resume.id,
+                    ResumeChunkModel.section == "education"
+                )
+            )
+
+            education_items = result.scalars().all()
+
+            if not education_items:
+                logger.info(
+                    "_list_education - No education found, returning message - success")
+                return "No education found."
+
+            education_data = [
+                {
+                    "id": e.id,
+                    "institution": e.meta_data.get("institution"),
+                    "degree": e.meta_data.get("degree"),
+                    "start_year": e.meta_data.get("start_year"),
+                    "end_year": e.meta_data.get("end_year"),
+                }
+                for e in education_items
+            ]
+
+            logger.info("_list_education - Education listed successfully")
+
+            return education_data
+        except Exception as e:
+            logger.error("_list_education - Error occurred", exc_info=True)
+            raise
+
+    async def _list_skills(self):
+        try:
+            repo = ResumeRepository(self.session)
+            active_resume = await repo.get_active_resume()
+
+            if not active_resume:
+                logger.info(
+                    "_list_skills - No active resume found, returning message - success")
+                return "No active resume found."
+
+            result = await self.session.execute(
+                select(ResumeChunkModel)
+                .where(
+                    ResumeChunkModel.resume_id == active_resume.id,
+                    ResumeChunkModel.section == "skills"
+                )
+            )
+
+            skill_chunks = result.scalars().all()
+
+            if not skill_chunks:
+                logger.info(
+                    "_list_skills - No skills found, returning message - success")
+                return "No skills found."
+
+            # Skills can be stored as string in meta_data or as dict; normalize to list of skill strings
+            skills_data = []
+            for s in skill_chunks:
+                meta = s.meta_data
+                if isinstance(meta, str) and meta.strip():
+                    skills_data.append({"id": s.id, "skill": meta.strip()})
+                elif isinstance(meta, dict) and meta.get("skill"):
+                    skills_data.append({"id": s.id, "skill": meta["skill"]})
+                elif isinstance(meta, dict) and meta.get("name"):
+                    skills_data.append({"id": s.id, "skill": meta["name"]})
+
+            if not skills_data:
+                return "No skills found."
+
+            logger.info("_list_skills - Skills listed successfully")
+
+            return skills_data
+        except Exception as e:
+            logger.error("_list_skills - Error occurred", exc_info=True)
+            raise
+
     async def stream_response(self, user_id: int, user_message: str, mode: str = "candidate"):
         try:
             intent = await self.intent_service.classify(user_message)
@@ -124,6 +214,39 @@ class ChatService:
                 yield str({
                     "type": "projects_list",
                     "data": projects
+                })
+                return
+            if intent == "list_experience":
+                logger.info(
+                    "Intent matched with list_experience - Streaming response")
+                experience = await self._list_experience()
+                logger.info(
+                    "stream_response - Experience list stream generated successfully")
+                yield str({
+                    "type": "experience_list",
+                    "data": experience
+                })
+                return
+            if intent == "list_education":
+                logger.info(
+                    "Intent matched with list_education - Streaming response")
+                education = await self._list_education()
+                logger.info(
+                    "stream_response - Education list stream generated successfully")
+                yield str({
+                    "type": "education_list",
+                    "data": education
+                })
+                return
+            if intent == "list_skills":
+                logger.info(
+                    "Intent matched with list_skills - Streaming response")
+                skills = await self._list_skills()
+                logger.info(
+                    "stream_response - Skills list stream generated successfully")
+                yield str({
+                    "type": "skills_list",
+                    "data": skills
                 })
                 return
             history = await self.chat_repo.get_recent_messages(user_id)

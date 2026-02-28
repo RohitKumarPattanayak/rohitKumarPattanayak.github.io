@@ -38,7 +38,7 @@ class EmbeddingService:
             await self.usage_repo.usage_track(response, "embedding-service")
 
             embedding = response.data[0].embedding
-            cache.set(cache, embedding)
+            cache.set(cache_key, embedding)
 
             # logger.info("generate_embedding - Embedding generated and cached successfully")
 
