@@ -99,13 +99,13 @@ class ResumeIngestionService:
             if content_for_embedding.strip() == f"Section: {section}":
                 logger.info(
                     "_store_structured_chunk - No content to embed for section, skipping - success")
-                return
+                return None
 
             embedding = await self.embedding_service.generate_embedding(
                 content_for_embedding
             )
 
-            await self.resumeRepo.save_structured_chunk(
+            chunk = await self.resumeRepo.save_structured_chunk(
                 resume_id=resume_id,
                 section=section,
                 meta_data=meta_data,
@@ -113,8 +113,12 @@ class ResumeIngestionService:
                 embedding=embedding
             )
 
-            # logger.info("_store_structured_chunk - Structured chunk stored successfully")
+            return chunk
         except Exception as e:
             logger.error(
                 "_store_structured_chunk - Error occurred", exc_info=True)
             raise
+
+    async def inject_manual_data(self, resume_id: int, section: str, data: dict | str):
+        chunk = await self._store_structured_chunk(resume_id, section=section, meta_data=data)
+        return chunk

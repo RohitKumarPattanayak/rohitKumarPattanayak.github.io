@@ -16,10 +16,10 @@ class VectorSearchService:
 
     async def search(self, query: str, limit: int = 5):
         try:
-            # 1️⃣ Generate query embedding
+            # Generate query embedding
             query_embedding = await self.embedding_service.generate_embedding(query)
 
-            # 2️⃣ Search similar chunks from DB
+            # Search similar chunks from DB
             chunks = await self.resumeRepo.search_similar_chunks(
                 query_embedding=query_embedding,
                 limit=limit

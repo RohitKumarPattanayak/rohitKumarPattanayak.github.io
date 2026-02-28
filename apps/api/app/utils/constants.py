@@ -3,6 +3,7 @@ SEGREGATION_ARR = [
     "list_projects",
     "list_skills",
     "list_experience",
+    "list_education",
     "semantic_search"
 ]
 PARSE_SECTION_PROJECT = [

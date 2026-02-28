@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from typing import Any, Union
 
 from app.core.dependencies import get_db
 from app.services.resume_injestion_service import ResumeIngestionService
@@ -10,6 +12,38 @@ from app.services.file_parser import FileParserService
 from app.core.logger import logger
 
 router = APIRouter(prefix="/resume", tags=["Resume"])
+
+
+class InjectManualDataRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    resume_id: int = Field(..., gt=0)
+    section: str = Field(..., min_length=1, max_length=20)
+    data: Union[dict[str, Any], str]
+
+    @field_validator("section")
+    @classmethod
+    def validate_and_normalize_section(cls, v: str) -> str:
+        v = (v or "").strip()
+        if not v:
+            raise ValueError("section must be a non-empty string")
+        if len(v) > 20:
+            raise ValueError("section must be at most 20 characters")
+        return v.lower()
+
+    @field_validator("data")
+    @classmethod
+    def validate_data(cls, v):
+        if isinstance(v, str):
+            s = v.strip()
+            if not s:
+                raise ValueError("data must be a non-empty string")
+            return s
+        if isinstance(v, dict):
+            if not v:
+                raise ValueError("data must be a non-empty object")
+            return v
+        raise ValueError("data must be either a string or an object")
 
 
 @router.post("/upload")
@@ -66,6 +100,44 @@ async def activate_resume(resume_id: int, db: AsyncSession = Depends(get_db)):
         return {"message": "Resume activated"}
     except Exception as e:
         logger.error("activate_resume - Error occurred", exc_info=True)
+        raise
+
+
+@router.post("/inject_manual_data")
+async def inject_manual_data(
+    body: InjectManualDataRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        resume_result = await db.execute(
+            select(ResumeModel).where(ResumeModel.id == body.resume_id)
+        )
+        resume = resume_result.scalar_one_or_none()
+        if not resume:
+            raise HTTPException(status_code=404, detail="resume_id not found")
+
+        service = ResumeIngestionService(db)
+        chunk = await service.inject_manual_data(
+            resume_id=body.resume_id,
+            section=body.section,
+            data=body.data
+        )
+        if chunk is None:
+            raise HTTPException(
+                status_code=400,
+                detail="Data produced no embeddable content for the given section."
+            )
+        logger.info("inject_manual_data - Chunk injected successfully")
+        return {
+            "message": "Chunk added with embedding",
+            "chunk_id": chunk.id,
+            "resume_id": chunk.resume_id,
+            "section": chunk.section
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("inject_manual_data - Error occurred", exc_info=True)
         raise
 
 
