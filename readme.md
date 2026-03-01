@@ -9,13 +9,14 @@ ssh -T git@github.com
 
 
 
-2) run the app : 
+2) run the app (Backend) : 
 GO inside /apps/api
 - python -m venv venv
 - venv\Scripts\activate
 - pip install -r requirements.txt
-
-python -m app.main
+in /infra
+- docker compose up -d
+- python -m app.main
 
 
 
@@ -51,6 +52,10 @@ What Is HNSW Index?
    It allows you to find the most similar vectors very fast, without scanning every row in the table.
 
 
-
+5) run the app frontend : 
+- npm create vite@latest web -- --template react-ts
+- npm install @tanstack/react-query zustand react-router-dom recharts axios @tanstack/react-query-devtools
+- npm install -D tailwindcss postcss autoprefixer
+- npx tailwindcss init -p
 
 
