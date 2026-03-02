@@ -4,3 +4,8 @@ export const getResumes = async () => {
   const response = await api.get("/resume") // adjust endpoint
   return response.data
 }
+
+// export const getResumes = async () => {
+//   const response = await api.get("/resume") // adjust endpoint
+//   return response.data
+// }
