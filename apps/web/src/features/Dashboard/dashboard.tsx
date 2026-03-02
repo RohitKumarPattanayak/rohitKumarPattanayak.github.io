@@ -1,8 +1,7 @@
-import { useQuery } from "@tanstack/react-query"
-import dashboardQueryOptions from "../../utils/DashboardQueryOptions"
+import { dashboardFetchResumes } from "../../react-queries/DashboardQueries"
 
 const DashboardPage = () => {
-  const { data, isLoading, error } = useQuery(dashboardQueryOptions())
+  const { data, isLoading, error } = dashboardFetchResumes();
 
   if (isLoading) return <p>Loading resumes...</p>
 
