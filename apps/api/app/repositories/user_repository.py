@@ -85,6 +85,7 @@ class UserRepository:
         try:
             offset = params.get("offset")
             limit = params.get("limit", 1000)
+            search = params.get("search")
 
             stmt = (
                 select(
@@ -92,8 +93,12 @@ class UserRepository:
                     func.count().over().label("total_count")
                 )
                 .order_by(UserModel.username.asc())
-                .limit(limit)
             )
+
+            if search:
+                stmt = stmt.where(UserModel.username.op("~*")(search))
+
+            stmt = stmt.limit(limit)
 
             # Add offset only if provided
             if offset is not None:

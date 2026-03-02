@@ -35,6 +35,7 @@ async def create_user(request: CreateUserRequest, session: AsyncSession = Depend
 async def fetch_all_users(
     offset: int | None = Query(default=None, ge=0),
     limit: int | None = Query(default=None, ge=1),
+    search: str | None = Query(default=None),
     session: AsyncSession = Depends(get_db)
 ):
     try:
@@ -42,6 +43,7 @@ async def fetch_all_users(
         params = {
             "offset": offset,
             "limit": limit,
+            "search": search
         }
         users, total = await service.get_all_users(params)
         return PaginatedUserResponse(
