@@ -92,7 +92,7 @@ class UserRepository:
                     UserModel,
                     func.count().over().label("total_count")
                 )
-                .order_by(UserModel.username.asc())
+                .order_by(UserModel.id.asc())
             )
 
             if search:

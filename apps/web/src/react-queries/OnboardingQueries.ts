@@ -22,9 +22,9 @@ const onboardingUseQuery = {
 }
 
 const onboardingUseInfiniteQuery = {
-    fetchAllUsersInfinite: (limit: number, options = {}) => ({
-      queryKey: ['fetch-users-infinite'],
-      queryFn: ({ pageParam = 0 }) => fetchAllUser({ offset: pageParam, limit }),
+    fetchAllUsersInfinite: (limit: number, search: string, options = {}) => ({
+      queryKey: ['fetch-users-infinite', search],
+      queryFn: ({ pageParam = 0 }) => fetchAllUser({ offset: pageParam, limit, search }),
       getNextPageParam: (lastPage: any, allPages: any) => {
         const nextOffset = allPages.length * limit;
         if (nextOffset < lastPage.total) {
@@ -67,6 +67,6 @@ export const onboardingfetchAllUsers = () => {
     return useQuery(onboardingUseQuery.fetchAllUsers())
   }
 
-export const onboardingFetchAllUsersInfinite = (limit = 100) => {
-    return useInfiniteQuery(onboardingUseInfiniteQuery.fetchAllUsersInfinite(limit))
+export const onboardingFetchAllUsersInfinite = (search = "", limit = 10) => {
+    return useInfiniteQuery(onboardingUseInfiniteQuery.fetchAllUsersInfinite(limit, search))
 }

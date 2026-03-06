@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useUserStore } from "../../store/user.store"
 import { useNavigate } from "react-router-dom"
 import { onboardingCreateUser, onboardingFetchAllUsersInfinite ,onboardingUpdateUser} from '../../react-queries/OnboardingQueries'
@@ -10,6 +10,16 @@ const OnboardingModal = () => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
+  
+  const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, 500)
+    return () => clearTimeout(handler)
+  }, [search])
 
   const setUser = useUserStore((s) => s.setUser)
   const navigate = useNavigate()
@@ -32,11 +42,11 @@ const OnboardingModal = () => {
     navigate("/dashboard/chat")
   }
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = onboardingFetchAllUsersInfinite()
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = onboardingFetchAllUsersInfinite(debouncedSearch, 10)
   const users = data?.pages.flatMap(page => page.items) || [];
 
   const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
-    const bottom = Math.abs(e.currentTarget.scrollHeight - e.currentTarget.scrollTop - e.currentTarget.clientHeight) < 2;
+    const bottom = Math.abs(e.currentTarget.scrollHeight - e.currentTarget.scrollTop - e.currentTarget.clientHeight) < 10;
     if (bottom && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
@@ -119,37 +129,48 @@ const OnboardingModal = () => {
               </div>
 
               {isDropdownOpen && (
-                <ul 
-                  onScroll={handleScroll}
-                  style={{
+                <div style={{
                     position: "absolute",
                     top: "100%",
                     left: 0,
                     width: "100%",
-                    maxHeight: "150px",
-                    overflowY: "auto",
                     background: "white",
                     border: "1px solid #ccc",
                     borderRadius: "4px",
-                    margin: 0,
-                    padding: 0,
-                    listStyle: "none",
                     zIndex: 10
-                  }}
-                >
-                  {isLoading && <li style={{ padding: "8px" }}>Loading...</li>}
-                  {users.map((u: any) => (
-                    <li 
-                      key={u.id} 
-                      onClick={() => handleSelectUser(u)}
-                      style={{ padding: "8px", cursor: "pointer", borderBottom: "1px solid #eee" }}
-                    >
-                      {u.username}
-                    </li>
-                  ))}
-                  {isFetchingNextPage && <li style={{ padding: "8px" }}>Loading more...</li>}
-                  {!hasNextPage && !isLoading && users.length > 0 && <li style={{ padding: "8px", color: "gray", fontSize: "12px" }}>No more users</li>}
-                </ul>
+                  }}>
+                  <input
+                    autoFocus
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search users..."
+                    style={{ width: "calc(100% - 16px)", margin: "8px", padding: "8px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
+                  />
+                  <ul 
+                    onScroll={handleScroll}
+                    style={{
+                      maxHeight: "150px",
+                      overflowY: "auto",
+                      margin: 0,
+                      padding: 0,
+                      listStyle: "none"
+                    }}
+                  >
+                    {isLoading && <li style={{ padding: "8px" }}>Loading...</li>}
+                    {users.map((u: any) => (
+                      <li 
+                        key={u.id} 
+                        onClick={() => handleSelectUser(u)}
+                        style={{ padding: "8px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                      >
+                        {u.username}
+                      </li>
+                    ))}
+                    {isFetchingNextPage && <li style={{ padding: "8px" }}>Loading more...</li>}
+                    {!hasNextPage && !isLoading && users.length > 0 && <li style={{ padding: "8px", color: "gray", fontSize: "12px" }}>No more users</li>}
+                    {!isLoading && users.length === 0 && <li style={{ padding: "8px", color: "gray", fontSize: "12px" }}>No users found</li>}
+                  </ul>
+                </div>
               )}
             </div>
 
