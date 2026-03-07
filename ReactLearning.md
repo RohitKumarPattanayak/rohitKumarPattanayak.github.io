@@ -80,10 +80,9 @@ CONCEPTS :
 https://www.youtube.com/watch?v=mPaCnwpFvZY
 https://youtu.be/e74rB-14-m8?si=kEJxjz69U_0TNByK    
 Documentation - https://tanstack.com/query/v5/docs/framework/react/reference/useMutation
-- useQuery 
-- userSaveQuery 
-- useQueries
-- useInfiniteQuery
+- useQuery : is used for fetch data from server
+- useQueries : is used to fetch multiple data from server
+- useInfiniteQuery : is used for pagination type fetch data from server
 - userMutaion : is used to make update/create call to server where in useQuery is used for fetch calls
 
 
