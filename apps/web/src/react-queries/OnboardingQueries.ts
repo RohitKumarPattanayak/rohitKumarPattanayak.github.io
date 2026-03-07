@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useInfiniteQuery } from "@tanstack/react-query"
 import { createUser , fetchAllUser, updateUser } from "../services/user.service"
+import { getResumes } from "../services/resume.service"
 
 
 const onboardingMutations = {
@@ -17,8 +18,13 @@ const onboardingUseQuery = {
     fetchAllUsers: (options = {}) => ({
       queryKey: ['fetch-users'],
       queryFn: fetchAllUser,
-      options
+      ...options
     }),
+    getActiveResume: (options = {}) => ({
+      queryKey: ['fetch-active-resume'],
+      queryFn: () => getResumes(true),
+      ...options
+  }),
 }
 
 const onboardingUseInfiniteQuery = {
@@ -70,3 +76,7 @@ export const onboardingfetchAllUsers = () => {
 export const onboardingFetchAllUsersInfinite = (search = "", limit = 10) => {
     return useInfiniteQuery(onboardingUseInfiniteQuery.fetchAllUsersInfinite(limit, search))
 }
+
+export const onboardingFetchActiveResume = () => {
+  return useQuery(onboardingUseQuery.getActiveResume())
+} 

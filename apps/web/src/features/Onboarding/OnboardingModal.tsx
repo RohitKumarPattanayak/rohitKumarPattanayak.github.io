@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useUserStore } from "../../store/user.store"
 import { useNavigate } from "react-router-dom"
-import { onboardingCreateUser, onboardingFetchAllUsersInfinite, onboardingUpdateUser } from '../../react-queries/OnboardingQueries'
+import { onboardingCreateUser, onboardingFetchAllUsersInfinite, onboardingUpdateUser, onboardingFetchActiveResume } from '../../react-queries/OnboardingQueries'
 
 const OnboardingModal = () => {
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null)
@@ -13,6 +13,38 @@ const OnboardingModal = () => {
 
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  const { data: activeResume, error: activeResumeError, isLoading: isActiveResumeLoading } = onboardingFetchActiveResume()
+
+  const [typedText, setTypedText] = useState("")
+  const [isTypingComplete, setIsTypingComplete] = useState(false)
+
+  const fullText = isActiveResumeLoading
+    ? "Loading data..."
+    : activeResume?.name
+      ? `Welcome To ${activeResume.name}'s Portfolio`
+      : "Welcome To Portfolio"
+
+  useEffect(() => {
+    if (isActiveResumeLoading) return;
+
+    setTypedText("")
+    setIsTypingComplete(false)
+
+    let currentIndex = 0
+    const intervalId = setInterval(() => {
+      // Use currentIndex <= fullText.length to ensure the last character is fully typed before finishing
+      if (currentIndex <= fullText.length) {
+        setTypedText(fullText.slice(0, currentIndex))
+        currentIndex++
+      } else {
+        setIsTypingComplete(true)
+        clearInterval(intervalId)
+      }
+    }, 45) // Adjust typing speed here (lower is faster)
+
+    return () => clearInterval(intervalId)
+  }, [fullText, isActiveResumeLoading])
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -72,21 +104,33 @@ const OnboardingModal = () => {
               <div className="mx-auto w-16 h-16 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.2)] dark:shadow-[0_0_30px_rgba(99,102,241,0.3)] mb-6">
                 <span className="text-3xl text-white">👋</span>
               </div>
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2">Welcome to Nexus</h2>
-              <p className="text-gray-500 dark:text-gray-400 mb-8 text-sm">Is this your first time accessing the system?</p>
+              {activeResumeError && (
+                <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 text-sm">
+                  ⚠️ Failed to fetch active resume: {activeResumeError?.message}
+                </div>
+              )}
+              <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2 min-h-[32px]">
+                {typedText}
+                {!isTypingComplete && <span className="animate-pulse">|</span>}
+              </h2>
+              <p className={`text-gray-500 dark:text-gray-400 mb-8 text-sm transition-opacity duration-700 ${isTypingComplete ? 'opacity-100' : 'opacity-0'}`}>
+                Is this your first time accessing the portfolio ?
+              </p>
 
               <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => setIsFirstTime(true)}
-                  className="py-3 px-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-all font-medium text-gray-700 dark:text-white shadow-sm dark:shadow-none active:scale-95"
+                  disabled={!isTypingComplete}
+                  className="py-3 px-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 transition-all font-medium text-gray-700 dark:text-white shadow-sm dark:shadow-none active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                 >
                   Yes, I'm new
                 </button>
                 <button
                   onClick={() => setIsFirstTime(false)}
-                  className="py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all font-medium text-white shadow-[0_4px_14px_0_rgb(0,118,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,118,255,0.23)] dark:shadow-[0_0_20px_rgba(79,70,229,0.3)] dark:hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] active:scale-95 border border-indigo-500"
+                  disabled={!isTypingComplete}
+                  className="py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-all font-medium text-white shadow-[0_4px_14px_0_rgb(0,118,255,0.39)] hover:shadow-[0_6px_20px_rgba(0,118,255,0.23)] dark:shadow-[0_0_20px_rgba(79,70,229,0.3)] dark:hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] active:scale-95 border border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none"
                 >
-                  No, login
+                  No, Already Accesed
                 </button>
               </div>
             </div>
@@ -241,7 +285,7 @@ const OnboardingModal = () => {
                             <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                             Authenticating...
                           </span>
-                        ) : "Access System"}
+                        ) : "Proceed To Portfolio Chatbot"}
                       </button>
                     </div>
 
