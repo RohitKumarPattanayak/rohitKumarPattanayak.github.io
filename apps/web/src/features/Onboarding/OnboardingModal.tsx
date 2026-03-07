@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useUserStore } from "../../store/user.store"
 import { useNavigate } from "react-router-dom"
-import { onboardingCreateUser, onboardingFetchAllUsersInfinite ,onboardingUpdateUser} from '../../react-queries/OnboardingQueries'
+import { onboardingCreateUser, onboardingFetchAllUsersInfinite, onboardingUpdateUser } from '../../react-queries/OnboardingQueries'
 
 const OnboardingModal = () => {
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null)
@@ -10,7 +10,7 @@ const OnboardingModal = () => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<any>(null)
-  
+
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
@@ -24,20 +24,20 @@ const OnboardingModal = () => {
   const setUser = useUserStore((s) => s.setUser)
   const navigate = useNavigate()
 
-  const { mutateAsync: createMutation , isPending: isCreatePending , isError: isCreateError , error: createError } = onboardingCreateUser()
-  const { mutateAsync: updateMutation , isPending: isUpdatePending , isError: isUpdateError , error: updateError } = onboardingUpdateUser()
+  const { mutateAsync: createMutation, isPending: isCreatePending, isError: isCreateError, error: createError } = onboardingCreateUser()
+  const { mutateAsync: updateMutation, isPending: isUpdatePending, isError: isUpdateError, error: updateError } = onboardingUpdateUser()
 
   // Since we fetch users directly, handleLogin just sets the store state locally.
   const handleLogin = async () => {
     if (!username.trim()) return
-    let user : any = await updateMutation({user_id: selectedUser.id, mode})
+    let user: any = await updateMutation({ user_id: selectedUser.id, mode })
     setUser(user.id, user.username, user.mode)
     navigate("/dashboard/chat")
   }
 
   const handleCreate = async () => {
     if (!username.trim()) return
-    let user : any = await createMutation({username, mode})
+    let user: any = await createMutation({ username, mode })
     setUser(user.id, user.username, user.mode)
     navigate("/dashboard/chat")
   }
@@ -61,12 +61,12 @@ const OnboardingModal = () => {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#000000aa", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <div style={{ background: "white", padding: "2rem", width: "400px", borderRadius: "8px" , color: 'black'}}>
-        
+      <div style={{ background: "white", padding: "2rem", width: "400px", borderRadius: "8px", color: 'black' }}>
+
         {isFirstTime === null && (
           <>
             <h2>Welcome 👋</h2>
-            <p>Is this your first time?</p>
+            <p>Is this your first time ?</p>
             <button onClick={() => setIsFirstTime(true)}>Yes</button>
             <button onClick={() => setIsFirstTime(false)}>No</button>
           </>
@@ -76,17 +76,17 @@ const OnboardingModal = () => {
           <>
             <h3>Create Profile</h3>
 
-        <input
-          placeholder="Unique Name"
-          value={username}
-          onChange={(e) => {
-            const value = e.target.value
-            if (/^[a-zA-Z0-9]*$/.test(value)) {
-              setName(value)
-            }
-          }}
-          style={{ width: "100%", marginBottom: "1rem" }}
-        />
+            <input
+              placeholder="Unique Name"
+              value={username}
+              onChange={(e) => {
+                const value = e.target.value
+                if (/^[a-zA-Z0-9]*$/.test(value)) {
+                  setName(value)
+                }
+              }}
+              style={{ width: "100%", marginBottom: "1rem" }}
+            />
 
             <select
               value={mode}
@@ -98,7 +98,7 @@ const OnboardingModal = () => {
             </select>
 
             <button onClick={handleCreate} disabled={isCreatePending}>
-              { isCreatePending ? "Creating..." : "Create" }
+              {isCreatePending ? "Creating..." : "Create"}
             </button>
 
             {isCreateError && (
@@ -114,12 +114,12 @@ const OnboardingModal = () => {
             <h3>Login</h3>
 
             <div style={{ position: "relative", width: "100%", marginBottom: "1rem" }}>
-              <div 
+              <div
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 style={{
-                  width: "100%", 
-                  padding: "8px", 
-                  border: "1px solid #ccc", 
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid #ccc",
                   borderRadius: "4px",
                   cursor: "pointer",
                   background: "#fff"
@@ -130,23 +130,23 @@ const OnboardingModal = () => {
 
               {isDropdownOpen && (
                 <div style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    width: "100%",
-                    background: "white",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                    zIndex: 10
-                  }}>
+                  position: "absolute",
+                  top: "100%",
+                  left: 0,
+                  width: "100%",
+                  background: "white",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  zIndex: 10
+                }}>
                   <input
                     autoFocus
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search users..."
+                    placeholder="select your user"
                     style={{ width: "calc(100% - 16px)", margin: "8px", padding: "8px", boxSizing: "border-box", border: "1px solid #ccc", borderRadius: "4px" }}
                   />
-                  <ul 
+                  <ul
                     onScroll={handleScroll}
                     style={{
                       maxHeight: "150px",
@@ -158,8 +158,8 @@ const OnboardingModal = () => {
                   >
                     {isLoading && <li style={{ padding: "8px" }}>Loading...</li>}
                     {users.map((u: any) => (
-                      <li 
-                        key={u.id} 
+                      <li
+                        key={u.id}
                         onClick={() => handleSelectUser(u)}
                         style={{ padding: "8px", cursor: "pointer", borderBottom: "1px solid #eee" }}
                       >
@@ -186,14 +186,14 @@ const OnboardingModal = () => {
                 </select>
 
                 <button onClick={handleLogin} disabled={isUpdatePending}>
-                  { isUpdatePending ? "Loading..." : "Login" }
+                  {isUpdatePending ? "Loading..." : "Login"}
                 </button>
 
                 {isUpdateError && (
                   <p style={{ color: "red" }}>
                     Failed to login {updateError?.message}
                   </p>
-                )}                
+                )}
               </>
             )}
           </>
