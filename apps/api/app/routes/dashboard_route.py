@@ -52,6 +52,42 @@ async def list_projects(db: AsyncSession = Depends(get_db)):
         raise
 
 
+@router.get("/portfolio")
+async def get_portfolio(db: AsyncSession = Depends(get_db)):
+    try:
+        repo = ResumeRepository(db)
+        active_resume = await repo.get_active_resume()
+
+        if not active_resume:
+            logger.info(
+                "get_portfolio - No active resume found, returning empty dict - success")
+            return {}
+
+        result = await db.execute(
+            select(ResumeChunkModel.section, ResumeChunkModel.meta_data, ResumeChunkModel.content)
+            .where(ResumeChunkModel.resume_id == active_resume.id)
+        )
+
+        rows = result.all()
+        portfolio = {}
+
+        for row in rows:
+            section = row.section
+            if section not in portfolio:
+                portfolio[section] = []
+            
+            portfolio[section].append({
+                "meta_data": row.meta_data,
+                "content": row.content
+            })
+
+        logger.info("get_portfolio - Portfolio data fetched successfully")
+        return portfolio
+    except Exception as e:
+        logger.error("get_portfolio - Error occurred", exc_info=True)
+        raise
+
+
 @router.get("/{project_id}")
 async def get_project(project_id: int, db: AsyncSession = Depends(get_db)):
 
