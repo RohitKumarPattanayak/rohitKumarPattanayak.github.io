@@ -1,32 +1,14 @@
+import { api } from "./api";
+
 export const streamChatConversation = async (
-    params: {userId: number, message: string},
-): Promise<void> => {
-    const {userId , message } = params;
-    const baseUrl = (import.meta.env.VITE_BASE_API_URL || "http://localhost:8000").replace(/\/$/, "");
-    const authApiKey = import.meta.env.VITE_AUTH_API_KEY;
-
-    const fetchHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-    };
-
-    if (authApiKey) {
-        fetchHeaders["Authorization"] = `Bearer ${authApiKey}`;
-    }
-
-    const response = await fetch(`${baseUrl}/chat/conversation`, {
-        method: "POST",
-        headers: fetchHeaders,
-        body: JSON.stringify({
-            user_id: userId,
-            message: message,
-        }),
+    params: { userId: number; message: string },
+): Promise<unknown> => {
+    const { userId, message } = params;
+    const response = await api.post("/chat/conversation", {
+        user_id: userId,
+        message,
     });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-
-    return response.json();
+    return response.data;
 };
 export interface ChatMessage {
     id: number;
@@ -42,25 +24,6 @@ export interface ChatMessage {
 export const getChatConversation = async (
     userId: number,
 ): Promise<ChatMessage[]> => {
-    const baseUrl = (import.meta.env.VITE_BASE_API_URL || "http://localhost:8000").replace(/\/$/, "");
-    const authApiKey = import.meta.env.VITE_AUTH_API_KEY;
-
-    const fetchHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-    };
-
-    if (authApiKey) {
-        fetchHeaders["Authorization"] = `Bearer ${authApiKey}`;
-    }
-
-    const response = await fetch(`${baseUrl}/chat/get-conversation/${userId}`, {
-        method: "GET",
-        headers: fetchHeaders,
-    });
-
-    if (!response.ok) {
-        throw new Error("Network response was not ok");
-    }
-
-    return response.json();
+    const response = await api.get(`/chat/get-conversation/${userId}`);
+    return response.data;
 };
