@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, lazy, Suspense } from "react"
 import { Outlet, NavLink, useLocation } from "react-router-dom"
 import { useUserStore } from "../store/user.store"
-import OnboardingModal from "../features/Onboarding/OnboardingModal"
+import LoadingFallback from "../components/shared/LoadingFallback"
+const OnboardingModal = lazy(() => import("../features/Onboarding/OnboardingModal"))
 import { MessageSquare, LayoutDashboard, Settings, UserCircle, Zap, Menu, X, Sun, Moon } from "lucide-react"
 
 const DashboardLayout = () => {
@@ -63,7 +64,11 @@ const DashboardLayout = () => {
         </div>
       </div>
 
-      {!username && <OnboardingModal />}
+      {!username && (
+        <Suspense fallback={<LoadingFallback message="Loading Onboarding..." />}>
+          <OnboardingModal />
+        </Suspense>
+      )}
 
       {/* Mobile Overlay */}
       {isSidebarOpen && (

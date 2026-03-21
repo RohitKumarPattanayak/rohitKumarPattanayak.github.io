@@ -1,42 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { Terminal, Sparkles, Code2, ArrowRight } from "lucide-react";
 import { useUserStore } from "../../store/user.store";
 import { chatResponseMutation, getChatConversationQuery } from "../../react-queries/ChatQueries";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { useQueryClient } from "@tanstack/react-query";
+import LoadingFallback from "../../components/shared/LoadingFallback";
 
-const TypewriterMarkdown = ({ content, animate, onTyping }: { content: string, animate: boolean, onTyping?: () => void }) => {
-    const [displayedContent, setDisplayedContent] = useState(animate ? "" : content);
-    
-    useEffect(() => {
-        if (!animate) {
-            setDisplayedContent(content);
-            return;
-        }
-        
-        let i = 0;
-        setDisplayedContent("");
-        const interval = setInterval(() => {
-            i += 4;
-            if (i >= content.length) {
-                setDisplayedContent(content);
-                clearInterval(interval);
-            } else {
-                setDisplayedContent(content.slice(0, i));
-            }
-            if (onTyping) onTyping();
-        }, 15);
-
-        return () => clearInterval(interval);
-    }, [content, animate]);
-
-    return (
-         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {displayedContent}
-        </ReactMarkdown>
-    );
-};
+const TypewriterMarkdown = lazy(()=>(import ('./TypewriterMarkdown')))
 
 export const ChatPage = () => {
     const id = useUserStore((state) => state.id);
@@ -173,11 +142,13 @@ export const ChatPage = () => {
                                         <div className="relative pl-6 mb-8 before:absolute before:inset-y-0 before:left-2 before:w-px before:bg-gradient-to-b before:from-indigo-300 dark:before:from-indigo-500/50 before:to-transparent">
                                             <div className="p-6 rounded-3xl border transition-all duration-500 overflow-hidden relative bg-white/80 dark:bg-[#0a0a0c]/80 backdrop-blur-md border-gray-200 dark:border-white/[0.06] shadow-xl dark:shadow-2xl hover:border-gray-300 dark:hover:border-white/[0.1] hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5">
                                                 <div className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-200 tracking-wide [&>p]:mb-4 [&>h1]:text-2xl [&>h1]:font-bold [&>h2]:text-xl [&>h2]:font-bold [&>h3]:text-lg [&>h3]:font-bold [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4 [&>li]:mb-1 [&_strong]:text-gray-900 [&_strong]:dark:text-white [&_code]:bg-gray-100 [&_code]:dark:bg-white/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&>pre]:bg-gray-800 [&>pre]:text-gray-100 [&>pre]:p-4 [&>pre]:rounded-xl [&>pre]:overflow-x-auto [&>pre]:mb-4">
-                                                    <TypewriterMarkdown 
-                                                        content={msg.message} 
-                                                        animate={new Date(msg.created_at).getTime() > sessionStartTime.current} 
-                                                        onTyping={scrollToBottomInstant}
-                                                    />
+                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading markup response..." />}>
+                                                        <TypewriterMarkdown 
+                                                            content={msg.message} 
+                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current} 
+                                                            onTyping={scrollToBottomInstant}
+                                                        />
+                                                    </Suspense>
                                                 </div>
                                             </div>
                                         </div>
