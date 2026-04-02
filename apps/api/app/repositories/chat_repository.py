@@ -11,13 +11,14 @@ class ChatRepository:
         self.session = session
         self.resume_repo = ResumeRepository(session)
 
-    async def create_message(self, user_id: int, role: str, message: str, mode):
+    async def create_message(self, user_id: int, role: str, message: str, mode, content_type: str = 'text'):
         try:
             resume = await self.resume_repo.get_active_resume()
             chat_message = ChatMessageModel(
                 user_id=user_id,
                 role=role,
                 message=message,
+                content_type=content_type,
                 mode=mode,
                 resume_id=resume.id
             )

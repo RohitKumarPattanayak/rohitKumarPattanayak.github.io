@@ -270,10 +270,11 @@ class ChatService:
         try:
             # intent = await self.intent_service.classify(user_message)
             intent = user_message
-
+            await self.chat_repo.create_message(user_id, "user", user_message, mode)            
             if intent == "introduction":
                 logger.info("Intent matched with introduction - Streaming response")
                 intro = await self._get_introduction()
+                await self.chat_repo.create_message(user_id, "assistant", intro, mode)
                 logger.info("stream_response - Introduction stream generated successfully")
                 return {
                     "type": "introduction",
@@ -283,6 +284,7 @@ class ChatService:
             elif intent == "total_experience":
                 logger.info("Intent matched with total_experience - Streaming response")
                 total_exp = await self._get_total_experience()
+                await self.chat_repo.create_message(user_id, "assistant", total_exp, mode)
                 logger.info("stream_response - Total experience stream generated successfully")
                 return {
                     "type": "total_experience",
@@ -292,6 +294,7 @@ class ChatService:
             elif intent == "list_projects":
                 logger.info("Intent matched with list_projects - Streaming response")
                 projects = await self._list_projects()
+                await self.chat_repo.create_message(user_id, "assistant", str(projects), mode, 'other')
                 logger.info("stream_response - Projects list stream generated successfully")
                 return {
                     "type": "projects_list",
@@ -301,6 +304,7 @@ class ChatService:
             elif intent == "list_experience":
                 logger.info("Intent matched with list_experience - Streaming response")
                 experience = await self._list_experience()
+                await self.chat_repo.create_message(user_id, "assistant", str(experience), mode, 'other')
                 logger.info("stream_response - Experience list stream generated successfully")
                 return {
                     "type": "experience_list",
@@ -310,6 +314,7 @@ class ChatService:
             elif intent == "list_education":
                 logger.info("Intent matched with list_education - Streaming response")
                 education = await self._list_education()
+                await self.chat_repo.create_message(user_id, "assistant", str(education), mode, 'other')
                 logger.info("stream_response - Education list stream generated successfully")
                 return {
                     "type": "education_list",
@@ -319,6 +324,7 @@ class ChatService:
             elif intent == "list_skills":
                 logger.info("Intent matched with list_skills - Streaming response")
                 skills = await self._list_skills()
+                await self.chat_repo.create_message(user_id, "assistant", str(skills), mode, 'other')
                 logger.info("stream_response - Skills list stream generated successfully")
                 return {
                     "type": "skills_list",
@@ -363,7 +369,6 @@ class ChatService:
             logger.info(
                 "stream_response - Streaming response created successfully")
 
-            await self.chat_repo.create_message(user_id, "user", user_message, mode)
             await self.chat_repo.create_message(user_id, "assistant", api_response, mode)
             return {
                 "type" : "llm",
