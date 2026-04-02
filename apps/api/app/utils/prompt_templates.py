@@ -10,6 +10,8 @@ RESUME_PARSER_PROMPT_TEMP = Template("""
             Follow this exact structure:
 
             {{
+            "introduction": "",
+            "total_experience": "",
             "projects": [
                 {{
                 "title": "",
@@ -28,9 +30,7 @@ RESUME_PARSER_PROMPT_TEMP = Template("""
                 "description": ""
                 }}
             ],
-            "skills": [
-                ""
-            ],
+            "skills": "",
             "education": [
                 {{
                 "institution": "",
@@ -42,19 +42,19 @@ RESUME_PARSER_PROMPT_TEMP = Template("""
             }}
 
             Rules:
+            - introduction: Provide a brief 2-3 sentence professional summary of the candidate.
+            - total_experience: Calculate and store the total duration of work experience (e.g., "5 years, 3 months").
+            - skills: This must be a single comma-separated string of all identified technical and soft skills.
             - Extract all available sections.
-            - If a section is missing, return an empty array [].
+            - If a section is missing, return an empty array [] or empty string "" accordingly.
             - Do NOT hallucinate information.
-            - Do NOT summarize.
-            - Preserve technical details exactly as written.
+            - Do NOT summarize project or experience descriptions; preserve technical details exactly as written.
             - Dates should remain as strings.
-            - Tech stack must be an array of strings.
-            - Skills must be an array of strings.
+            - Tech stack within projects must remain an array of strings.
 
             Resume Text:
             ${raw_text}
             """)
-
 INTENT_PROMPT_TEMP = Template("""
             Classify the user's intent.
 

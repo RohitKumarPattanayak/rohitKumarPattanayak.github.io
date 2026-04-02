@@ -34,7 +34,6 @@ class ResumeParserService:
                 temperature=0,
                 response_format=response_format_constants.PARSE_RESUME_RESPONSE_FORMAT
             )
-
             await self.usage_repo.usage_track(response, "parse-resume")
 
             content = response.choices[0].message.content

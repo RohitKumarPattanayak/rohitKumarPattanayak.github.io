@@ -86,3 +86,5 @@ _INTENT_PATTERNS = {
         r"\bportfolio\b"
     ),
 }
+
+RESUME_INJESTION_SECTIONS = ["projects", "experience", "education", "skills", "introduction", "total_experience"]

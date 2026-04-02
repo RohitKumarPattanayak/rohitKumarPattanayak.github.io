@@ -7,6 +7,14 @@ PARSE_RESUME_RESPONSE_FORMAT = {
         "schema": {
             "type": "object",
             "properties": {
+                "introduction": {
+                    "type": "string",
+                    "description": "A brief professional introduction of the candidate."
+                },
+                "total_experience": {
+                    "type": "string",
+                    "description": "The total calculated duration of work experience (e.g., '5 years, 2 months')."
+                },
                 "projects": {
                     "type": "array",
                     "items": {
@@ -21,10 +29,10 @@ PARSE_RESUME_RESPONSE_FORMAT = {
                             "description": {"type": "string"},
                             "impact": {"type": "string"}
                         },
-                        "required": constants.PARSE_SECTION_PROJECT
+                        "required": constants.PARSE_SECTION_PROJECT,
+                        "additionalProperties": False
                     }
                 },
-
                 "experience": {
                     "type": "array",
                     "items": {
@@ -36,15 +44,14 @@ PARSE_RESUME_RESPONSE_FORMAT = {
                             "end_date": {"type": "string"},
                             "description": {"type": "string"}
                         },
-                        "required": constants.PARSE_SECTION_EXPERIANCE
+                        "required": constants.PARSE_SECTION_EXPERIANCE,
+                        "additionalProperties": False
                     }
                 },
-
                 "skills": {
-                    "type": "array",
-                    "items": {"type": "string"}
+                    "type": "string",
+                    "description": "A single comma-separated string containing all skills."
                 },
-
                 "education": {
                     "type": "array",
                     "items": {
@@ -55,18 +62,23 @@ PARSE_RESUME_RESPONSE_FORMAT = {
                             "start_year": {"type": "string"},
                             "end_year": {"type": "string"}
                         },
-                        "required": constants.PARSE_SECTION_EDUCATION
+                        "required": constants.PARSE_SECTION_EDUCATION,
+                        "additionalProperties": False
                     }
                 }
             },
-
-            "required": ["projects", "experience", "skills", "education"],
-
+            "required": [
+                "introduction", 
+                "total_experience", 
+                "projects", 
+                "experience", 
+                "skills", 
+                "education"
+            ],
             "additionalProperties": False
         }
     }
 }
-
 
 INTENT_CLASIFY_RESPONSE_FORMAT = {
     "type": "json_schema",
