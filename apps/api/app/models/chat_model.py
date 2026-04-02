@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Enum
 from sqlalchemy.sql import func
 from app.core.database import Base
-from app.models.z_enums import UserMode
+from app.models.z_enums import UserMode,ContentType
 
 
 class ChatMessageModel(Base):
@@ -11,6 +11,7 @@ class ChatMessageModel(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     role = Column(String, nullable=False)
     message = Column(Text, nullable=False)
+    content_type = Column(Enum(ContentType), nullable=False, default= 'text')
     mode = Column(Enum(UserMode), nullable=False)
     resume_id = Column(Integer, ForeignKey("resumes.id", ondelete="CASCADE"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())

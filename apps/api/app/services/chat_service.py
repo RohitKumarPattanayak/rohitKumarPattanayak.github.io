@@ -246,7 +246,9 @@ class ChatService:
                     "type": "skills_list",
                     "data": skills
                 }
-            history = await self.chat_repo.get_recent_messages(user_id)
+            
+            history = await self.chat_repo.get_recent_messages(user_id,5,True)
+            
             formatted_history = [
                 {"role": msg.role, "content": msg.message}
                 for msg in reversed(history)

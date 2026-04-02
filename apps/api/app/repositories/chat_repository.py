@@ -1,9 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from app.models.chat_model import ChatMessageModel
 from app.core.logger import logger
 from app.repositories.resume_repository import ResumeRepository
-
+import asyncio
 
 class ChatRepository:
 
@@ -35,15 +35,32 @@ class ChatRepository:
             )
             raise
 
-    async def get_recent_messages(self, user_id: int, limit: int = 5):
+    async def get_recent_messages(self, user_id: int, limit: int = 5, clean_up: bool = False):
         try:
+            activeResume = await self.resume_repo.get_active_resume()
             result = await self.session.execute(
                 select(ChatMessageModel)
-                .where(ChatMessageModel.user_id == user_id)
+                .where(
+                    ChatMessageModel.user_id == user_id,
+                    ChatMessageModel.resume_id == activeResume.id
+                )
                 .order_by(ChatMessageModel.created_at.desc())
                 .limit(limit)
             )
             messages = result.scalars().all()
+            if clean_up and messages:
+                oldest_kept = messages[-1].created_at
+
+                await self.session.execute(
+                    delete(ChatMessageModel).where(
+                        ChatMessageModel.user_id == user_id,
+                        ChatMessageModel.created_at < oldest_kept,
+                        ChatMessageModel.resume_id == activeResume.id
+                    )
+                )
+                await self.session.commit()
+                logger.info(
+                f"get_recent_messages - user_id={user_id} - cleanup older chat completed - len={len(messages)}")
             logger.info(
                 f"get_recent_messages - user_id={user_id} - fetched successfully - len={len(messages)}")
             return messages
