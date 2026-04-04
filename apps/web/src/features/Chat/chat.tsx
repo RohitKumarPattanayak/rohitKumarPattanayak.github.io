@@ -9,6 +9,8 @@ import EmptyState from "../../components/chat/EmptyState";
 const TypewriterMarkdown = lazy(() => (import('../../components/shared/TypewriterMarkdown')))
 const ProjectsCard = lazy(() => (import('../../components/shared/cards/ProjectsCard')))
 const SkillsCard = lazy(() => (import('../../components/shared/cards/SkillsCard')))
+const ExperienceCard = lazy(() => (import('../../components/shared/cards/ExperienceCard')))
+const EducationCard = lazy(() => (import('../../components/shared/cards/EducationCard')))
 // const EmptyState = lazy(()=>(import ('../../components/chat/EmptyState')))
 
 EmptyState.displayName = "EmptyState";
@@ -142,6 +144,24 @@ export const ChatPage = () => {
                                                     <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading skills..." />}>
                                                         <SkillsCard
                                                             skills={msg.message}
+                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
+                                                            onAnimationComplete={scrollToBottomInstant}
+                                                        />
+                                                    </Suspense>
+                                                )}
+                                                {msg.content_type === "list_experience" && (
+                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading experience..." />}>
+                                                        <ExperienceCard
+                                                            experiences={msg.message}
+                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
+                                                            onAnimationComplete={scrollToBottomInstant}
+                                                        />
+                                                    </Suspense>
+                                                )}
+                                                {msg.content_type === "list_education" && (
+                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading education..." />}>
+                                                        <EducationCard
+                                                            education={msg.message}
                                                             animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
                                                             onAnimationComplete={scrollToBottomInstant}
                                                         />
