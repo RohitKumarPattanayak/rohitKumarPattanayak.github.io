@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -8,7 +8,9 @@ interface Props {
     onTyping?: () => void;
 }
 
-const TypewriterMarkdown = ({ content, animate, onTyping }: Props) => {
+const remarkPlugins = [remarkGfm];
+
+const TypewriterMarkdown = memo(({ content, animate, onTyping }: Props) => {
     const [displayedContent, setDisplayedContent] = useState(animate ? "" : content);
     
     useEffect(() => {
@@ -34,10 +36,12 @@ const TypewriterMarkdown = ({ content, animate, onTyping }: Props) => {
     }, [content, animate]);
 
     return (
-         <ReactMarkdown remarkPlugins={[remarkGfm]}>
+         <ReactMarkdown remarkPlugins={remarkPlugins}>
             {displayedContent}
         </ReactMarkdown>
     );
-};
+});
+
+TypewriterMarkdown.displayName = "TypewriterMarkdown";
 
 export default TypewriterMarkdown;

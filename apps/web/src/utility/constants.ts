@@ -1,0 +1,15 @@
+export const PortfolioSectionOrder = [
+  'introduction',
+  'intrpduction',
+  'total experiance',
+  'total experience',
+  'education',
+  'experiance',
+  'experience',
+  'project',
+  'projects',
+  'skill',
+  'skills',
+  'other',
+  'others',
+];

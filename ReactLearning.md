@@ -91,3 +91,5 @@ Documentation - https://tanstack.com/query/v5/docs/framework/react/reference/use
 2) zustund (Is a simple replacement for redux tools)
 - used for client state management and centralized store management 
 https://www.youtube.com/watch?v=_ngCLZ5Iz-0
+
+3) rollup-plugin-visualizer (For size division and analysis of bundle size)
