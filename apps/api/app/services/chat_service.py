@@ -1,3 +1,4 @@
+from app.utils.constants import LIMIT_OF_MESSAGE
 from app.services.embedding_service import EmbeddingService
 from app.services.vector_search_service import VectorSearchService
 from app.repositories.resume_repository import ResumeRepository
@@ -451,7 +452,7 @@ class ChatService:
 
     async def get_conversation(self, user_id: int):
         try:
-            result = await self.chat_repo.get_recent_messages(user_id)
+            result = await self.chat_repo.get_recent_messages(user_id, LIMIT_OF_MESSAGE)
             return result
         except Exception as e:
             logger.error("get_conversation - Error occurred", exc_info=True)

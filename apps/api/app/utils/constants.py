@@ -117,3 +117,5 @@ RESUME_INJESTION_SECTIONS = [
     "education", 
     "skills"
 ]
+
+LIMIT_OF_MESSAGE = 4
