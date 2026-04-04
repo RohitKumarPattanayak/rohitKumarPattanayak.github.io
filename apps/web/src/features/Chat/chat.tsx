@@ -7,7 +7,8 @@ import LoadingFallback from "../../components/shared/LoadingFallback";
 import EmptyState from "../../components/chat/EmptyState";
 
 const TypewriterMarkdown = lazy(() => (import('../../components/shared/TypewriterMarkdown')))
-const ProjectCard = lazy(() => (import('../../components/shared/cards/ProjectCards')))
+const ProjectsCard = lazy(() => (import('../../components/shared/cards/ProjectsCard')))
+const SkillsCard = lazy(() => (import('../../components/shared/cards/SkillsCard')))
 // const EmptyState = lazy(()=>(import ('../../components/chat/EmptyState')))
 
 EmptyState.displayName = "EmptyState";
@@ -128,28 +129,23 @@ export const ChatPage = () => {
                                                         />
                                                     </Suspense>
                                                 }
-                                                {msg.content_type == "list_projects" && (
-                                                    <div
-                                                        id="list_projects"
-                                                        className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto p-2"
-                                                    >
-                                                        <div className="text-sm font-semibold text-gray-700">
-                                                            📂 Here are some of my projects
-                                                        </div>
-                                                        {msg.message.map((item: any) => {
-                                                            return (
-                                                                <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading project card..." />}>
-                                                                    <ProjectCard
-                                                                        key={item.id}
-                                                                        title={item?.title || "Project"}
-                                                                        description={item?.description || "Project description"}
-                                                                        link={`/projects/${item.id}`}
-                                                                        animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
-                                                                    />
-                                                                </Suspense>
-                                                            )
-                                                        })}
-                                                    </div>
+                                                {msg.content_type === "list_projects" && (
+                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading skills..." />}>
+                                                        <ProjectsCard
+                                                            projects={msg.message}
+                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
+                                                            onAnimationComplete={scrollToBottomInstant}
+                                                        />
+                                                    </Suspense>
+                                                )}
+                                                {msg.content_type == "list_skills" && (
+                                                    <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading skills..." />}>
+                                                        <SkillsCard
+                                                            skills={msg.message}
+                                                            animate={new Date(msg.created_at).getTime() > sessionStartTime.current}
+                                                            onAnimationComplete={scrollToBottomInstant}
+                                                        />
+                                                    </Suspense>
                                                 )}
                                             </div>
                                         </div>
