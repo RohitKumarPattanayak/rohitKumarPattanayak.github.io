@@ -3,7 +3,7 @@ from sqlalchemy import select, delete
 from app.models.chat_model import ChatMessageModel
 from app.core.logger import logger
 from app.repositories.resume_repository import ResumeRepository
-import asyncio
+import ast
 
 class ChatRepository:
 
@@ -64,6 +64,10 @@ class ChatRepository:
                 f"get_recent_messages - user_id={user_id} - cleanup older chat completed - len={len(messages)}")
             logger.info(
                 f"get_recent_messages - user_id={user_id} - fetched successfully - len={len(messages)}")
+            
+            for msg in messages:
+                if msg.role != 'user':
+                    msg.message = ast.literal_eval(msg.message)
             return messages
         except Exception:
             logger.error(
