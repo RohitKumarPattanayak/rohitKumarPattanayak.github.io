@@ -1,9 +1,0 @@
-Backend structure with FastAPI, services, repos
-Resume ingestion + AI parsing
-Vector/pgvector integration
-Chat + semantic search + intent filtering
-Streaming responses
-Conversation memory storage
-Mode switching (candidate / recruiter)
-Token usage tracking schema
-Analytics tracking design

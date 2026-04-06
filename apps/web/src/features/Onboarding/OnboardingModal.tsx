@@ -1,22 +1,124 @@
-import { useState, useEffect } from "react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useUserStore } from "../../store/user.store"
 import { useNavigate } from "react-router-dom"
 import { onboardingCreateUser, onboardingFetchAllUsersInfinite, onboardingUpdateUser, onboardingFetchActiveResume } from '../../react-queries/OnboardingQueries'
+import TypingHeading from "../../components/shared/onboarding/TypeHeading"
+
+type UserMode = "recruiter" | "candidate"
+
+type UserItem = {
+  id: number
+  username: string
+  mode: UserMode
+}
+
+type SearchInputProps = {
+  value: string
+  onChange: (value: string) => void
+}
+
+type UserRowProps = {
+  user: UserItem
+  onSelect: (user: UserItem) => void
+}
+
+type UserDropdownProps = {
+  isOpen: boolean
+  search: string
+  onSearchChange: (value: string) => void
+  users: UserItem[]
+  isLoading: boolean
+  isFetchingNextPage: boolean
+  hasNextPage: boolean
+  onScroll: (e: React.UIEvent<HTMLUListElement>) => void
+  onSelectUser: (user: UserItem) => void
+}
+
+const SearchInput = memo(({ value, onChange }: SearchInputProps) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value)
+  }, [onChange])
+
+  return (
+    <div className="p-2 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/40">
+      <input
+        autoFocus
+        value={value}
+        onChange={handleChange}
+        placeholder="Search users..."
+        className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
+      />
+    </div>
+  )
+})
+
+const UserRow = memo(({ user, onSelect }: UserRowProps) => {
+  const handleClick = useCallback(() => {
+    onSelect(user)
+  }, [onSelect, user])
+
+  return (
+    <li
+      onClick={handleClick}
+      className="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50 dark:hover:text-white dark:hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between group"
+    >
+      <span>{user.username}</span>
+      <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400">{user.mode}</span>
+    </li>
+  )
+})
+
+const UserDropdown = memo(({
+  isOpen,
+  search,
+  onSearchChange,
+  users,
+  isLoading,
+  isFetchingNextPage,
+  hasNextPage,
+  onScroll,
+  onSelectUser,
+}: UserDropdownProps) => {
+  if (!isOpen) return null
+
+  return (
+    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#121216] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 [will-change:transform] [will-change:opacity]">
+      <SearchInput value={search} onChange={onSearchChange} />
+      <ul
+        onScroll={onScroll}
+        className="max-h-48 overflow-y-auto w-full scrollbar-hide py-1"
+      >
+        {isLoading && <li className="px-4 py-3 text-sm text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full border-2 border-indigo-200 dark:border-indigo-400/30 border-t-indigo-600 dark:border-t-indigo-400 animate-spin" />
+          Loading directory...
+        </li>}
+        {users.map((u) => (
+          <UserRow key={u.id} user={u} onSelect={onSelectUser} />
+        ))}
+        {isFetchingNextPage && <li className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full border-2 border-gray-200 dark:border-gray-500/30 border-t-gray-500 animate-spin" />
+          Indexing...
+        </li>}
+        {!hasNextPage && !isLoading && users.length > 0 && <li className="px-4 py-3 text-[11px] text-center text-gray-400 dark:text-white/20 uppercase tracking-widest font-semibold bg-gray-50 dark:bg-black/20">End of directory</li>}
+        {!isLoading && users.length === 0 && <li className="px-4 py-4 text-sm text-center text-gray-500">No matching identities</li>}
+      </ul>
+    </div>
+  )
+})
 
 const OnboardingModal = () => {
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null)
   const [username, setName] = useState("")
-  const [mode, setMode] = useState<"recruiter" | "candidate">("candidate")
+  const [mode, setMode] = useState<UserMode>("candidate")
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [selectedUser, setSelectedUser] = useState<UserItem | null>(null)
 
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
   const { data: activeResume, error: activeResumeError, isLoading: isActiveResumeLoading } = onboardingFetchActiveResume()
 
-  const [typedText, setTypedText] = useState("")
   const [isTypingComplete, setIsTypingComplete] = useState(false)
 
   const fullText = isActiveResumeLoading
@@ -24,27 +126,6 @@ const OnboardingModal = () => {
     : activeResume?.name
       ? `Welcome To ${activeResume.name}'s Portfolio`
       : "Welcome To Portfolio"
-
-  useEffect(() => {
-    if (isActiveResumeLoading) return;
-
-    setTypedText("")
-    setIsTypingComplete(false)
-
-    let currentIndex = 0
-    const intervalId = setInterval(() => {
-      // Use currentIndex <= fullText.length to ensure the last character is fully typed before finishing
-      if (currentIndex <= fullText.length) {
-        setTypedText(fullText.slice(0, currentIndex))
-        currentIndex++
-      } else {
-        setIsTypingComplete(true)
-        clearInterval(intervalId)
-      }
-    }, 45) // Adjust typing speed here (lower is faster)
-
-    return () => clearInterval(intervalId)
-  }, [fullText, isActiveResumeLoading])
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -60,43 +141,64 @@ const OnboardingModal = () => {
   const { mutateAsync: updateMutation, isPending: isUpdatePending, isError: isUpdateError, error: updateError } = onboardingUpdateUser()
 
   // Since we fetch users directly, handleLogin just sets the store state locally.
-  const handleLogin = async () => {
+  const handleLogin = useCallback(async () => {
     if (!username.trim()) return
-    let user: any = await updateMutation({ user_id: selectedUser.id, mode })
+    if (!selectedUser) return
+    const user = await updateMutation({ user_id: selectedUser.id, mode }) as UserItem
     setUser(user.id, user.username, user.mode)
     navigate("/dashboard/chat")
-  }
+  }, [mode, navigate, selectedUser, setUser, updateMutation, username])
 
-  const handleCreate = async () => {
+  const handleCreate = useCallback(async () => {
     if (!username.trim()) return
-    let user: any = await createMutation({ username, mode })
+    const user = await createMutation({ username, mode }) as UserItem
     setUser(user.id, user.username, user.mode)
     navigate("/dashboard/chat")
-  }
+  }, [createMutation, mode, navigate, setUser, username])
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = onboardingFetchAllUsersInfinite(debouncedSearch, 10)
-  const users = data?.pages.flatMap(page => page.items) || [];
+  const users = useMemo<UserItem[]>(() => {
+    return data?.pages.flatMap((page) => page.items as UserItem[]) || []
+  }, [data])
 
-  const handleScroll = (e: React.UIEvent<HTMLUListElement>) => {
-    const bottom = Math.abs(e.currentTarget.scrollHeight - e.currentTarget.scrollTop - e.currentTarget.clientHeight) < 10;
-    if (bottom && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+  const userCacheRef = useRef<Map<string, UserItem[]>>(new Map())
+  useEffect(() => {
+    if (users.length > 0) {
+      userCacheRef.current.set(debouncedSearch, users)
     }
-  }
+  }, [debouncedSearch, users])
 
-  const handleSelectUser = (user: any) => {
+  const stableUsers = useMemo<UserItem[]>(() => {
+    return users.length > 0 ? users : (userCacheRef.current.get(debouncedSearch) ?? [])
+  }, [debouncedSearch, users])
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLUListElement>) => {
+    const bottom = e.currentTarget.scrollTop + e.currentTarget.clientHeight >= e.currentTarget.scrollHeight - 10
+    if (bottom && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
+  const handleSelectUser = useCallback((user: UserItem) => {
     setSelectedUser(user)
     setName(user.username)
     setMode(user.mode)
     setIsDropdownOpen(false)
-  }
+  }, [])
+
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch(value)
+  }, [])
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white/80 dark:bg-black/80 backdrop-blur-md flex justify-center items-center p-4 transition-colors duration-500">
-      <div className="w-full max-w-md bg-white border border-gray-200 dark:bg-[#0a0a0c]/90 dark:border-white/10 p-8 rounded-[2rem] shadow-2xl relative backdrop-blur-xl text-gray-900 dark:text-gray-100 transition-colors duration-500">
+    <div className="fixed inset-0 z-[9999] flex justify-center items-center p-4">
+      {/* Decoupled backdrop overlay to prevent repainting when modal content changes */}
+      <div className="absolute inset-0 bg-white/80 dark:bg-black/80  transition-colors duration-500 pointer-events-none" />
+
+      <div className="w-full max-w-md bg-white border border-gray-200 dark:bg-[#0a0a0c]/90 dark:border-white/10 p-8 rounded-[2rem] shadow-2xl relative z-10 text-gray-900 dark:text-gray-100 transition-colors duration-500 transform-gpu">
 
         {/* Decorative background glow */}
-        <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-100/50 dark:from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-100/50 dark:from-indigo-500/10 via-transparent to-transparent pointer-events-none transform-gpu" />
 
         <div className="relative z-10 flex flex-col gap-6">
           {isFirstTime === null && (
@@ -109,10 +211,7 @@ const OnboardingModal = () => {
                   ⚠️ Failed to fetch active resume: {activeResumeError?.message}
                 </div>
               )}
-              <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-2 min-h-[32px]">
-                {typedText}
-                {!isTypingComplete && <span className="animate-pulse">|</span>}
-              </h2>
+              <TypingHeading fullText={fullText} isActiveResumeLoading={isActiveResumeLoading} isTypingComplete={isTypingComplete} setIsTypingComplete={setIsTypingComplete} />
               <p className={`text-gray-500 dark:text-gray-400 mb-8 text-sm transition-opacity duration-700 ${isTypingComplete ? 'opacity-100' : 'opacity-0'}`}>
                 Is this your first time accessing the portfolio ?
               </p>
@@ -163,7 +262,7 @@ const OnboardingModal = () => {
                   <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">Access Mode</label>
                   <select
                     value={mode}
-                    onChange={(e) => setMode(e.target.value as any)}
+                    onChange={(e) => setMode(e.target.value as UserMode)}
                     className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
                   >
                     <option value="candidate" className="bg-white dark:bg-[#0a0a0c]">Candidate</option>
@@ -222,44 +321,17 @@ const OnboardingModal = () => {
                     <span className="text-gray-400 dark:text-gray-600 text-xs">▼</span>
                   </div>
 
-                  {isDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-[#121216] border border-gray-200 dark:border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="p-2 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-black/40">
-                        <input
-                          autoFocus
-                          value={search}
-                          onChange={(e) => setSearch(e.target.value)}
-                          placeholder="Search users..."
-                          className="w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/5 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
-                        />
-                      </div>
-                      <ul
-                        onScroll={handleScroll}
-                        className="max-h-48 overflow-y-auto w-full scrollbar-hide py-1"
-                      >
-                        {isLoading && <li className="px-4 py-3 text-sm text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full border-2 border-indigo-200 dark:border-indigo-400/30 border-t-indigo-600 dark:border-t-indigo-400 animate-spin" />
-                          Loading directory...
-                        </li>}
-                        {users.map((u: any) => (
-                          <li
-                            key={u.id}
-                            onClick={() => handleSelectUser(u)}
-                            className="px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50 dark:hover:text-white dark:hover:bg-white/5 cursor-pointer transition-colors flex items-center justify-between group"
-                          >
-                            <span>{u.username}</span>
-                            <span className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-indigo-400">{u.mode}</span>
-                          </li>
-                        ))}
-                        {isFetchingNextPage && <li className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full border-2 border-gray-200 dark:border-gray-500/30 border-t-gray-500 animate-spin" />
-                          Indexing...
-                        </li>}
-                        {!hasNextPage && !isLoading && users.length > 0 && <li className="px-4 py-3 text-[11px] text-center text-gray-400 dark:text-white/20 uppercase tracking-widest font-semibold bg-gray-50 dark:bg-black/20">End of directory</li>}
-                        {!isLoading && users.length === 0 && <li className="px-4 py-4 text-sm text-center text-gray-500">No matching identities</li>}
-                      </ul>
-                    </div>
-                  )}
+                  <UserDropdown
+                    isOpen={isDropdownOpen}
+                    search={search}
+                    onSearchChange={handleSearchChange}
+                    users={stableUsers}
+                    isLoading={isLoading}
+                    isFetchingNextPage={isFetchingNextPage}
+                    hasNextPage={Boolean(hasNextPage)}
+                    onScroll={handleScroll}
+                    onSelectUser={handleSelectUser}
+                  />
                 </div>
 
                 {selectedUser && (
@@ -267,7 +339,7 @@ const OnboardingModal = () => {
                     <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider mt-4">Access Mode</label>
                     <select
                       value={mode}
-                      onChange={(e) => setMode(e.target.value as any)}
+                      onChange={(e) => setMode(e.target.value as UserMode)}
                       className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer"
                     >
                       <option value="candidate" className="bg-white dark:bg-[#0a0a0c]">Candidate</option>

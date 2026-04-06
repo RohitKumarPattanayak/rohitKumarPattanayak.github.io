@@ -13,7 +13,18 @@ const DashboardLayout = () => {
   const [isDarkMode, setIsDarkMode] = useState(false)
 
   // Sidebar state
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth >= 768
+    }
+    return true
+  })
+
+  // Prevent transition flicker on initial load
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Toggle dark mode on document body
   useEffect(() => {
@@ -80,8 +91,9 @@ const DashboardLayout = () => {
 
       {/* Sidebar - Heavily Glassmorphic & Responsive */}
       <aside
-        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"
-          }`}
+        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${
+          isMounted ? "transition-transform duration-300 ease-in-out" : ""
+        } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"}`}
       >
         <div className="mb-10 px-6 w-full flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">

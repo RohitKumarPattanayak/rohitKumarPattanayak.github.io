@@ -93,3 +93,5 @@ Documentation - https://tanstack.com/query/v5/docs/framework/react/reference/use
 https://www.youtube.com/watch?v=_ngCLZ5Iz-0
 
 3) rollup-plugin-visualizer (For size division and analysis of bundle size)
+
+4) React-scan (For scanning and analyzing the bundle size)
