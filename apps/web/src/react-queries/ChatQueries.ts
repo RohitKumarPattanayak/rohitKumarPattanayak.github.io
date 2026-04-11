@@ -9,10 +9,15 @@ const chatMutations = {
   }),
 }
 
+// sort asc for chronological UI display
 const chatQueries = {
   getChatResponse: (userId: number, options = {}) => ({
     queryKey: ["get-user-conversations", userId],
     queryFn: () => getChatConversation(userId),
+    select: (data: any[]) =>
+      [...data].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      ),
     ...options
   }),
 }

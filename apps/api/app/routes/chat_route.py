@@ -1,5 +1,6 @@
 from app.services.user_service import UserService
 from fastapi import APIRouter
+from app.repositories.chat_repository import ChatRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
@@ -51,4 +52,17 @@ async def get_chat_conversation(
         return conversation
     except Exception as e:
         logger.error("get_chat_conversation - Error occurred", exc_info=True)
+        raise
+
+@router.delete("/cleanup/{user_id}")
+async def cleanup_chat_messages(
+    user_id: int,
+    db: AsyncSession = Depends(get_db_write)
+):
+    try:
+        chat_repo = ChatRepository(db)
+        await chat_repo.cleanup_old_messages(user_id)
+        return {"status": "success", "message": "Cleanup completed"}
+    except Exception as e:
+        logger.error("cleanup_chat_messages - Error occurred", exc_info=True)
         raise

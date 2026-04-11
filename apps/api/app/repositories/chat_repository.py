@@ -1,3 +1,4 @@
+from app.utils.constants import LIMIT_OF_MESSAGE
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from app.models.chat_model import ChatMessageModel
@@ -36,7 +37,7 @@ class ChatRepository:
             )
             raise
 
-    async def get_recent_messages(self, user_id: int, limit: int = 5, clean_up: bool = False):
+    async def get_recent_messages(self, user_id: int, limit: int = 5):
         try:
             activeResume = await self.resume_repo.get_active_resume()
             result = await self.session.execute(
@@ -49,19 +50,6 @@ class ChatRepository:
                 .limit(limit)
             )
             messages = result.scalars().all()
-            if clean_up and messages:
-                oldest_kept = messages[-1].created_at
-
-                await self.session.execute(
-                    delete(ChatMessageModel).where(
-                        ChatMessageModel.user_id == user_id,
-                        ChatMessageModel.created_at < oldest_kept,
-                        ChatMessageModel.resume_id == activeResume.id
-                    )
-                )
-                await self.session.commit()
-                logger.info(
-                f"get_recent_messages - user_id={user_id} - cleanup older chat completed - len={len(messages)}")
             logger.info(
                 f"get_recent_messages - user_id={user_id} - fetched successfully - len={len(messages)}")
             
@@ -76,4 +64,35 @@ class ChatRepository:
         except Exception:
             logger.error(
                 f"get_recent_messages - user_id={user_id} - error", exc_info=True)
+            raise
+
+    async def cleanup_old_messages(self, user_id: int, keep_count: int = LIMIT_OF_MESSAGE):
+        try:
+            activeResume = await self.resume_repo.get_active_resume()
+            
+            # Find the timestamp of the (keep_count)th latest message
+            result = await self.session.execute(
+                select(ChatMessageModel.created_at)
+                .where(
+                    ChatMessageModel.user_id == user_id,
+                    ChatMessageModel.resume_id == activeResume.id
+                )
+                .order_by(ChatMessageModel.created_at.desc())
+                .offset(keep_count - 1)
+                .limit(1)
+            )
+            oldest_kept = result.scalar()
+
+            if oldest_kept:
+                await self.session.execute(
+                    delete(ChatMessageModel).where(
+                        ChatMessageModel.user_id == user_id,
+                        ChatMessageModel.created_at < oldest_kept,
+                        ChatMessageModel.resume_id == activeResume.id
+                    )
+                )
+                await self.session.commit()
+                logger.info(f"cleanup_old_messages - user_id={user_id} - cleanup older chat completed")
+        except Exception:
+            logger.error(f"cleanup_old_messages - user_id={user_id} - error", exc_info=True)
             raise

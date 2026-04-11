@@ -366,7 +366,7 @@ class ChatService:
                     "data": skills
                 }
             
-            history = await self.chat_repo.get_recent_messages(user_id,5,True)
+            history = await self.chat_repo.get_recent_messages(user_id, 4)
             
             formatted_history = [
                 {"role": msg.role, "content": msg.message}
@@ -452,7 +452,7 @@ class ChatService:
 
     async def get_conversation(self, user_id: int):
         try:
-            result = await self.chat_repo.get_recent_messages(user_id, LIMIT_OF_MESSAGE)
+            result = await self.chat_repo.get_recent_messages(user_id, limit=LIMIT_OF_MESSAGE)
             return result
         except Exception as e:
             logger.error("get_conversation - Error occurred", exc_info=True)
