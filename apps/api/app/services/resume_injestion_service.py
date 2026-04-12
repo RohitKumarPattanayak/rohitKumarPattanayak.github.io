@@ -17,6 +17,28 @@ class ResumeIngestionService:
         try:
             resume = await self.resumeRepo.create_resume(name)
             structured_data = await self.parser_service.parse_resume(raw_text)
+            # --- Injecting mock data explicitly as fallback ---
+            if "projects" in structured_data and isinstance(structured_data["projects"], list):
+                for project in structured_data["projects"]:
+                    if isinstance(project, dict) and not project.get("project_pic"):
+                        project["project_pic"] = "https://dummyimage.com/600x400/000/fff&text=Project+Image"
+                        
+            if not structured_data.get("resume_owner_pic"):
+                structured_data["resume_owner_pic"] = "https://dummyimage.com/400x400/000/fff&text=Profile+Pic"
+            
+            if not structured_data.get("social_links"):
+                structured_data["social_links"] = {
+                    "linkedin": "https://linkedin.com/in/dummy",
+                    "github": "https://github.com/dummy"
+                }
+
+            if not structured_data.get("personal_info"):
+                structured_data["personal_info"] = {
+                    "name": "Dummy Name",
+                    "email": "dummy@example.com",
+                    "phone": "+1-000-000-0000"
+                }
+            # ----------------------------------------------------
 
             sections = constants.RESUME_INJESTION_SECTIONS
 
@@ -36,13 +58,21 @@ class ResumeIngestionService:
                             meta_data=item
                         )
                 
-                # Case 2: The section is a single string (Introduction, Skills, Total Experience)
+                # Case 2: The section is a single string (Introduction, Skills, Total Experience, resume_owner_pic)
                 elif isinstance(data, str):
                     # Wrap the string in a dict so _store_structured_chunk can label it
                     await self._store_structured_chunk(
                         resume.id,
                         section=section,
                         meta_data={section: data} 
+                    )
+                
+                # Case 3: The section is a dict (social_links, personal_info)
+                elif isinstance(data, dict):
+                    await self._store_structured_chunk(
+                        resume.id,
+                        section=section,
+                        meta_data=data
                     )
 
             logger.info(
@@ -69,6 +99,9 @@ class ResumeIngestionService:
                 
                 if meta_data.get("total_experience"):
                     content_for_embedding += f"Total Experience: {meta_data['total_experience'].strip()}\n"
+                    
+                if meta_data.get("resume_owner_pic"):
+                    content_for_embedding += f"Resume Owner Profile Picture URL: {meta_data['resume_owner_pic'].strip()}\n"
 
                 # --- Existing Fields ---
                 if meta_data.get("title"):
@@ -79,6 +112,21 @@ class ResumeIngestionService:
 
                 if meta_data.get("role"):
                     content_for_embedding += f"Role: {meta_data['role'].strip()}\n"
+
+                if meta_data.get("name"):
+                    content_for_embedding += f"Name: {meta_data['name'].strip()}\n"
+
+                if meta_data.get("email"):
+                    content_for_embedding += f"Email: {meta_data['email'].strip()}\n"
+
+                if meta_data.get("phone"):
+                    content_for_embedding += f"Phone: {meta_data['phone'].strip()}\n"
+
+                if meta_data.get("linkedin"):
+                    content_for_embedding += f"LinkedIn: {meta_data['linkedin'].strip()}\n"
+
+                if meta_data.get("github"):
+                    content_for_embedding += f"GitHub: {meta_data['github'].strip()}\n"
 
                 # Handle tech_stack (still a list inside projects)
                 if meta_data.get("tech_stack") and isinstance(meta_data.get("tech_stack"), list):

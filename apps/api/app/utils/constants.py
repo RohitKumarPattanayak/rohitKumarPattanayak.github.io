@@ -18,7 +18,8 @@ PARSE_SECTION_PROJECT = [
     "company",
     "tech_stack",
     "description",
-    "impact"
+    "impact",
+    "project_pic"
 ]
 
 PARSE_SECTION_EXPERIANCE = [
@@ -115,7 +116,10 @@ RESUME_INJESTION_SECTIONS = [
     "projects", 
     "experience", 
     "education", 
-    "skills"
+    "skills",
+    "resume_owner_pic",
+    "social_links",
+    "personal_info"
 ]
 
 LIMIT_OF_MESSAGE = 4

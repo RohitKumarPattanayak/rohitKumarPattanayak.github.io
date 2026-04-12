@@ -17,6 +17,14 @@ class ResumeRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_chunks_by_resume_id(self, resume_id: int, sections: list[str] = None):
+        stmt = select(ResumeChunkModel).where(ResumeChunkModel.resume_id == resume_id)
+        if sections:
+            stmt = stmt.where(ResumeChunkModel.section.in_(sections))
+            
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
     async def set_active_resume(self, resume_id: int):
         try:
             await self.session.execute(

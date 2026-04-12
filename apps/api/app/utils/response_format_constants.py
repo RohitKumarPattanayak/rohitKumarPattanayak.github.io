@@ -27,7 +27,11 @@ PARSE_RESUME_RESPONSE_FORMAT = {
                                 "items": {"type": "string"}
                             },
                             "description": {"type": "string"},
-                            "impact": {"type": "string"}
+                            "impact": {"type": "string"},
+                            "project_pic": {
+                                "type": "string",
+                                "description": "A URL for the project thumbnail. If not available, use the default: https://dummyimage.com/600x400/000/fff&text=Project+Image"
+                            }
                         },
                         "required": constants.PARSE_SECTION_PROJECT,
                         "additionalProperties": False
@@ -65,6 +69,30 @@ PARSE_RESUME_RESPONSE_FORMAT = {
                         "required": constants.PARSE_SECTION_EDUCATION,
                         "additionalProperties": False
                     }
+                },
+                "resume_owner_pic": {
+                    "type": "string",
+                    "description": "A URL for the profile picture of the candidate. If not found in the resume, output exactly: https://dummyimage.com/400x400/000/fff&text=Profile+Pic"
+                },
+                "social_links": {
+                    "type": "object",
+                    "description": "Social media links. If not found, use default placeholders: {'linkedin': 'https://linkedin.com/in/dummy', 'github': 'https://github.com/dummy'}",
+                    "properties": {
+                        "linkedin": {"type": "string"},
+                        "github": {"type": "string"}
+                    },
+                    "additionalProperties": True
+                },
+                "personal_info": {
+                    "type": "object",
+                    "description": "Personal contact info. If any are missing, default to name='Dummy Name', email='dummy@example.com', phone='+1-000-000-0000'",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "email": {"type": "string"},
+                        "phone": {"type": "string"}
+                    },
+                    "required": ["name", "email", "phone"],
+                    "additionalProperties": False
                 }
             },
             "required": [
@@ -73,7 +101,10 @@ PARSE_RESUME_RESPONSE_FORMAT = {
                 "projects", 
                 "experience", 
                 "skills", 
-                "education"
+                "education",
+                "resume_owner_pic",
+                "social_links",
+                "personal_info"
             ],
             "additionalProperties": False
         }

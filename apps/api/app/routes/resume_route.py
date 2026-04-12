@@ -159,3 +159,41 @@ async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db_write)
     except Exception as e:
         logger.error("delete_resume - Error occurred", exc_info=True)
         raise
+
+@router.get("/{resume_id}")
+async def get_resume_by_id(
+    resume_id: int,
+    sections: str = Query(None, description="Comma separated list of sections to filter, e.g. projects,skills"),
+    db: AsyncSession = Depends(get_db_read)
+):
+    try:
+        resume_result = await db.execute(
+            select(ResumeModel).where(ResumeModel.id == resume_id)
+        )
+        resume = resume_result.scalar_one_or_none()
+        if not resume:
+            raise HTTPException(status_code=404, detail="Resume not found")
+
+        repo = ResumeRepository(db)
+        section_list = [s.strip() for s in sections.split(",")] if sections else None
+        chunks = await repo.get_chunks_by_resume_id(resume_id, section_list)
+
+        result_data = {
+            "id": resume.id,
+            "name": resume.name,
+            "is_active": resume.is_active,
+            "sections": {}
+        }
+        
+        for chunk in chunks:
+            if chunk.section not in result_data["sections"]:
+                result_data["sections"][chunk.section] = []
+            
+            result_data["sections"][chunk.section].append(chunk.meta_data)
+            
+        return result_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"get_resume_by_id - Error occurred: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
