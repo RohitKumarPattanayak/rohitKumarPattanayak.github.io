@@ -1,12 +1,14 @@
 import { useState, useEffect, lazy, Suspense } from "react"
 import { Outlet, NavLink, useLocation } from "react-router-dom"
 import { useUserStore } from "../store/user.store"
+import { useActiveResumeStore } from "../store/active_resume.store"
 import LoadingFallback from "../components/shared/LoadingFallback"
 const OnboardingModal = lazy(() => import("../features/Onboarding/OnboardingModal"))
 import { MessageSquare, LayoutDashboard, Settings, UserCircle, Zap, Menu, X, Sun, Moon } from "lucide-react"
 
 const DashboardLayout = () => {
   const { username } = useUserStore()
+  const { personal_info, resume_owner_pic } = useActiveResumeStore()
   const location = useLocation()
 
   // Theme state
@@ -91,21 +93,24 @@ const DashboardLayout = () => {
 
       {/* Sidebar - Heavily Glassmorphic & Responsive */}
       <aside
-        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${
-          isMounted ? "transition-transform duration-300 ease-in-out" : ""
-        } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"}`}
+        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${isMounted ? "transition-transform duration-300 ease-in-out" : ""
+          } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"}`}
       >
         <div className="mb-10 px-6 w-full flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="absolute inset-0 bg-indigo-400 dark:bg-indigo-500 blur-lg opacity-40 rounded-xl" />
-              <div className="relative bg-gradient-to-b from-indigo-500 to-indigo-600 dark:from-indigo-500 dark:to-indigo-700 p-2.5 rounded-xl border border-indigo-300/50 dark:border-indigo-400/30 shadow-xl dark:shadow-2xl">
-                <Zap size={20} className="text-white fill-white/20" strokeWidth={2} />
+              <div className="absolute inset-0 bg-indigo-400 dark:bg-indigo-500 blur-lg opacity-40 rounded-full transition-transform duration-300 hover:scale-110" />
+              <div className="relative bg-gradient-to-b from-indigo-500 to-indigo-600 dark:from-indigo-500 dark:to-indigo-700 p-[2px] rounded-full border border-indigo-300/50 dark:border-indigo-400/30 shadow-xl dark:shadow-2xl flex items-center justify-center w-14 h-14 overflow-hidden hover:scale-110 transition-transform duration-300 cursor-pointer">
+                {resume_owner_pic?.resume_owner_pic ? (
+                  <img src={resume_owner_pic.resume_owner_pic} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <Zap size={20} className="text-white fill-white/20" strokeWidth={2} />
+                )}
               </div>
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Nexus</h1>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-600 dark:text-indigo-400/80">Command</p>
+              <h1 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">AI PORTFOLIO</h1>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-600 dark:text-indigo-400/80 truncate max-w-[120px]">{personal_info?.name || "System"}</p>
             </div>
           </div>
           <button
@@ -174,13 +179,16 @@ const DashboardLayout = () => {
       {/* Main Content Area */}
       <main className={`flex-1 h-full relative z-10 flex flex-col bg-transparent w-full overflow-y-auto overflow-x-hidden`}>
         {/* Top Navbar for Hamburger Menu */}
-        <div className="absolute top-4 left-4 z-50 flex items-center">
-          <button
+        <div className="sticky top-0 z-50 w-full h-0 pointer-events-none">
+          <div className="absolute top-4 left-4 pointer-events-auto flex items-center">
+            <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            id="sidebar-toggle-btn"
             className="p-2.5 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 border border-gray-200 dark:border-white/[0.08] text-gray-800 dark:text-white rounded-xl shadow-sm dark:shadow-lg group"
           >
             <Menu size={20} className="text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-          </button>
+            </button>
+          </div>
         </div>
 
         {username ? <Outlet /> : null}

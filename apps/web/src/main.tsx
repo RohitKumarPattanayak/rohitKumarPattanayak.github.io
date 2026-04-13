@@ -6,7 +6,7 @@ import { AppProviders } from './app/providers.tsx'
 import { AppRouter } from './app/router.tsx'
 
 scan({
-  enabled: true
+  enabled: false
 })
 
 createRoot(document.getElementById('root')!).render(

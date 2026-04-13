@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback, lazy } from "react";
 import { useUserStore } from "../../store/user.store";
+import { useActiveResumeStore } from "../../store/active_resume.store";
+import { onboardingFetchActiveResume } from "../../react-queries/OnboardingQueries";
 import { chatResponseMutation, getChatConversationQuery } from "../../react-queries/ChatQueries";
 import { useQueryClient } from "@tanstack/react-query";
 import ChatMessage from "../../components/chat/ChatMessage";
@@ -22,6 +24,17 @@ export const ChatPage = () => {
     const { mutateAsync: inputChatResponse, isPending: isChatPending } = chatResponseMutation();
     const { data: chatConversation, isLoading: isChatConversationLoading } = getChatConversationQuery(id || 0);
 
+    const setResumeDetails = useActiveResumeStore((s) => s.setResumeDetails);
+    const { data: activeResume } = onboardingFetchActiveResume();
+
+    useEffect(() => {
+        if (activeResume) {
+            setResumeDetails(
+                activeResume.resume_owner_pic,
+                activeResume.personal_info
+            );
+        }
+    }, [activeResume, setResumeDetails]);
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, []);
