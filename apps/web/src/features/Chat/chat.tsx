@@ -53,11 +53,6 @@ export const ChatPage = () => {
         inputRef.current?.focus();
     }, []);
 
-    const handleCommandClick = useCallback((text: string) => {
-        setCurrentInput(text);
-    }, []);
-
-
     const handleSend = useCallback(async () => {
         if (!currentInput.trim() || isChatPending) return;
         if (!id) return;
@@ -104,7 +99,7 @@ export const ChatPage = () => {
                         </div>
                     ) : (!chatConversation || chatConversation.length === 0) ? (
                         <div className="h-[60vh] flex items-center justify-center">
-                            <EmptyState onCommandClick={handleCommandClick} />
+                            <EmptyState />
                         </div>
                     ) : (
                         (chatConversation || []).map((msg: any, index: number) => (
