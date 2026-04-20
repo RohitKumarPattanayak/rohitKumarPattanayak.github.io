@@ -43,10 +43,10 @@ const ProjectsCard = ({ projects = [], animate = false, onAnimationComplete }: P
       </div>
 
       {selectedProject && (
-        <Suspense fallback={<div className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-sm animate-in fade-in"></div>}>
-          <ProjectModal 
-            project={selectedProject} 
-            onClose={() => setSelectedProject(null)} 
+        <Suspense fallback={<div className="fixed inset-0 z-[100] bg-black/20 animate-in fade-in"></div>}>
+          <ProjectModal
+            project={selectedProject}
+            onClose={() => setSelectedProject(null)}
           />
         </Suspense>
       )}

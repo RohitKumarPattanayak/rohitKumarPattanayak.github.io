@@ -26,7 +26,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div

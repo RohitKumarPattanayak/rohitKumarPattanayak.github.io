@@ -26,7 +26,7 @@ const Skills = memo(({ data }: SkillsProps) => {
         {skillsList.map((skill, idx) => (
           <span 
             key={idx} 
-            className="px-4.5 py-2.5 bg-white dark:bg-[#0B1120]/80 border border-gray-200 dark:border-gray-800 rounded-xl text-gray-700 dark:text-gray-300 text-sm font-medium hover:border-amber-400/50 dark:hover:border-amber-500/50 hover:bg-amber-50 dark:hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400 hover:scale-[1.02] transition-all duration-300 cursor-default shadow-sm"
+            className="px-3 md:px-4.5 py-1.5 md:py-2.5 bg-white dark:bg-[#0B1120]/80 border border-gray-200 dark:border-gray-800 rounded-lg md:rounded-xl text-gray-700 dark:text-gray-300 text-[11px] md:text-sm font-medium hover:border-amber-400/50 dark:hover:border-amber-500/50 hover:bg-amber-50 dark:hover:bg-amber-500/5 hover:text-amber-600 dark:hover:text-amber-400 hover:scale-[1.02] transition-all duration-300 cursor-default shadow-sm"
           >
             {skill}
           </span>
