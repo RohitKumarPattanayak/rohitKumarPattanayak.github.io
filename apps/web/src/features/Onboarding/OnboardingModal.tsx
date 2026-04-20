@@ -119,7 +119,8 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
   if (showGuestPrompt) {
     return (
       <div className="w-full flex flex-col items-center animate-in fade-in zoom-in duration-300">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Are you sure?</h3>
+        <img src="/guest_illustration.png" alt="Got a second?" className="w-[140px] h-auto mb-4 opacity-100" />
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Got a second?</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm text-center leading-relaxed">
           We recommend creating a unique user Index.<br />
           It helps us better understand different users and improve answer quality.<br /><br />
@@ -128,7 +129,7 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
         <div className="flex flex-col gap-3 w-full">
           <button
             onClick={() => setShowGuestPrompt(false)}
-            className="w-full py-3 bg-[indigo] text-white font-medium border-0 cursor-pointer shadow-sm hover:bg-[#fa6a50] transition-colors"
+            className="w-full py-3 bg-[indigo]/30 text-white font-medium border-0 cursor-pointer shadow-sm hover:bg-[indigo]/50 transition-colors"
           >
             Sure
           </button>
@@ -166,16 +167,16 @@ const WelcomeView = memo(({ onModeSelect }: { onModeSelect: (mode: 'welcome' | '
         <button
           onClick={handleSignupClick}
           disabled={!isTypingComplete}
-          className="w-full py-3 bg-[indigo]/50 disabled:bg-[indigo]/20 text-white font-medium border-0 cursor-pointer"
+          className="w-full py-3 bg-[indigo]/40 disabled:bg-[indigo]/20 text-white font-medium border-0 cursor-pointer hover:bg-[indigo]/60 transition-colors"
         >
-          Generate User Index
+          Create New User
         </button>
         <button
           onClick={handleLoginClick}
           disabled={!isTypingComplete}
           className="w-full py-3 bg-gray-100 dark:bg-gray-800 disabled:opacity-50 text-gray-900 dark:text-gray-100 font-medium border-0 cursor-pointer"
         >
-          Already indexed
+          Already Existing User
         </button>
       </div>
 
@@ -208,10 +209,11 @@ const SignUpView = memo(({ onCancel }: { onCancel: () => void }) => {
   const handleModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value as UserMode), [])
 
   return (
-    <div className="w-full">
-      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">Sign Up</h3>
+    <div className="w-full flex flex-col items-center">
+      <img src="/create_illustration.png" alt="Sign Up" className="w-[140px] h-auto mb-4 opacity-100" />
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center w-full">Create Account</h3>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 w-full">
         <div>
           <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">USERNAME</label>
           <input value={username} onChange={handleNameChange} className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121216] p-3 text-gray-900 dark:text-gray-100 outline-none" placeholder="Enter username..." />
@@ -285,10 +287,11 @@ const LoginView = memo(({ onCancel }: { onCancel: () => void }) => {
   const handleModeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => setMode(e.target.value as UserMode), [])
 
   return (
-    <div className="w-full">
-      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center">Log In</h3>
+    <div className="w-full flex flex-col items-center">
+      <img src="/login_illustration.png" alt="Log In" className="w-[140px] h-auto mb-4 opacity-100" />
+      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6 text-center w-full">Welcome Back</h3>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 w-full">
         <div className="relative">
           <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">IDENTITY</label>
           <div onClick={handleToggleDropdown} className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#121216] p-3 text-gray-900 dark:text-gray-100 cursor-pointer flex justify-between">
