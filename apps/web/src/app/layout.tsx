@@ -93,7 +93,7 @@ const DashboardLayout = () => {
 
       {/* Sidebar - Heavily Glassmorphic & Responsive */}
       <aside
-        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${isMounted ? "transition-transform duration-300 ease-in-out" : ""
+        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white/70 font-mono dark:border-white/[0.04] dark:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${isMounted ? "transition-transform duration-300 ease-in-out" : ""
           } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"}`}
       >
         <div className="mb-10 px-6 w-full flex items-center justify-between gap-4">
@@ -109,8 +109,8 @@ const DashboardLayout = () => {
               </div>
             </div>
             <div>
-              <h1 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">AI PORTFOLIO</h1>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-indigo-600 dark:text-indigo-400/80 truncate max-w-[120px]">{personal_info?.name || "System"}</p>
+              <h1 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">PROFILE</h1>
+              <p className="text-[9px] uppercase font-bold tracking-widest text-indigo-600 dark:text-indigo-400/80 truncate max-w-[120px]">{personal_info?.name || "System"}</p>
             </div>
           </div>
           <button
@@ -131,7 +131,7 @@ const DashboardLayout = () => {
             }
           >
             <LayoutDashboard size={18} className="group-hover:scale-110" />
-            <span className="text-sm">Overview</span>
+            <span className="text-sm">Explore My Work</span>
           </NavLink>
           <NavLink
             to="/dashboard/chat"
@@ -141,7 +141,7 @@ const DashboardLayout = () => {
             }
           >
             <MessageSquare size={18} className="group-hover:scale-110" />
-            <span className="text-sm">Action Board</span>
+            <span className="text-sm">SmartFolio</span>
           </NavLink>
         </nav>
 
@@ -182,11 +182,11 @@ const DashboardLayout = () => {
         <div className="sticky top-0 z-50 w-full h-0 pointer-events-none">
           <div className="absolute top-4 left-4 pointer-events-auto flex items-center">
             <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            id="sidebar-toggle-btn"
-            className="p-2.5 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 border border-gray-200 dark:border-white/[0.08] text-gray-800 dark:text-white rounded-xl shadow-sm dark:shadow-lg group"
-          >
-            <Menu size={20} className="text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              id="sidebar-toggle-btn"
+              className="p-2.5 bg-white/80 dark:bg-black/40 hover:bg-white dark:hover:bg-black/60 border border-gray-200 dark:border-white/[0.08] text-gray-800 dark:text-white rounded-xl shadow-sm dark:shadow-lg group"
+            >
+              <Menu size={20} className="text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
             </button>
           </div>
         </div>

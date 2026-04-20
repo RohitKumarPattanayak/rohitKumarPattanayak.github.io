@@ -99,7 +99,7 @@ export const ChatPage = () => {
                         <div className="h-[60vh] flex items-center justify-center">
                             <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400">
                                 <div className="w-6 h-6 rounded-full border-2 border-indigo-300 dark:border-indigo-500/30 border-t-indigo-600 dark:border-t-indigo-500 animate-spin" />
-                                <span className="text-sm font-mono tracking-wide animate-pulse">Loading Nexus Core...</span>
+                                <span className="text-sm font-mono tracking-wide animate-pulse">Loading SmartFolio Core...</span>
                             </div>
                         </div>
                     ) : (!chatConversation || chatConversation.length === 0) ? (
