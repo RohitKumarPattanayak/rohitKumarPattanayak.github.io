@@ -26,7 +26,7 @@ const Skillscard = ({ skills = [], animate = false, onAnimationComplete }: Skill
                     }
                     className={`
                         px-3 py-1.5
-                        text-sm font-medium
+                        text-xs md:text-sm font-medium
                         bg-neutral-100
                         text-gray-700
                         border border-neutral-200

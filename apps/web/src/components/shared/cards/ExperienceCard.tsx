@@ -44,10 +44,10 @@ const ExperienceCard = ({ experiences = [], animate = false, onAnimationComplete
 
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-3">
                         <div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                 {exp.role}
                             </h3>
-                            <h4 className="text-[15px] font-semibold text-indigo-600/80 dark:text-indigo-300/80 mt-0.5">
+                            <h4 className="text-sm md:text-[15px] font-semibold text-indigo-600/80 dark:text-indigo-300/80 mt-0.5">
                                 {exp.company}
                             </h4>
                         </div>
@@ -59,7 +59,7 @@ const ExperienceCard = ({ experiences = [], animate = false, onAnimationComplete
                         </div>
                     </div>
 
-                    <div className="mt-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed text-justify relative bg-gray-50/50 dark:bg-white/[0.01] p-4 rounded-xl border border-gray-100/50 dark:border-white/[0.02]">
+                    <div className="mt-3 text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed text-justify relative bg-gray-50/50 dark:bg-white/[0.01] p-4 rounded-xl border border-gray-100/50 dark:border-white/[0.02]">
                         {exp.description}
                     </div>
                 </div>

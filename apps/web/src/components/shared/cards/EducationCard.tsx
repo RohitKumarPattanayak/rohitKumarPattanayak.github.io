@@ -42,11 +42,11 @@ const EducationCard = ({ education = [], animate = false, onAnimationComplete }:
                             <GraduationCap size={24} />
                         </div>
 
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white leading-tight mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                             {edu.degree}
                         </h3>
                         
-                        <div className="text-[15px] font-semibold text-gray-700 dark:text-gray-300 mb-5 flex gap-2 items-start">
+                        <div className="text-sm md:text-[15px] font-semibold text-gray-700 dark:text-gray-300 mb-5 flex gap-2 items-start">
                             <MapPin size={16} className="text-gray-400 shrink-0 mt-0.5" />
                             <span className="leading-snug">{edu.institution}</span>
                         </div>

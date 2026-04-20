@@ -54,11 +54,11 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 custom-scrollbar">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight mb-2 pr-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mb-2 pr-8">
               {project.title}
             </h2>
             {project.company && (
-              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+              <h3 className="text-xs sm:text-sm font-semibold text-slate-500 uppercase tracking-wider">
                 {project.company}
               </h3>
             )}
@@ -86,12 +86,12 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
           {/* Tech Stack */}
           {project.tech_stack && (
             <div className="mb-2">
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Technologies Used</h4>
+              <h4 className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Technologies Used</h4>
               <div className="flex flex-wrap gap-2">
                 {(Array.isArray(project.tech_stack) ? project.tech_stack : (project.tech_stack as string).split(',')).map((tech, idx) => (
                   <span
                     key={idx}
-                    className="px-3 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-xs font-medium"
+                    className="px-3 py-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg text-[10px] sm:text-xs font-medium"
                   >
                     {tech.trim()}
                   </span>
@@ -108,7 +108,7 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
               href={project.link}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 hover:shadow-md transition-all duration-300 group"
+              className="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-blue-700 hover:shadow-md transition-all duration-300 group"
             >
               Visit Project
               <ExternalLink className="w-4 h-4 ml-2 group-hover:translate-x-0.5 transition-transform" />

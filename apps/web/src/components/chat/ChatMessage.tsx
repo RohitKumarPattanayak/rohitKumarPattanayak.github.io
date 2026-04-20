@@ -24,7 +24,7 @@ const ChatMessage = memo(({ msg, sessionStartTime, scrollToBottomInstant, isLate
                 <div className="flex items-center gap-3 mb-6 pl-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-indigo-500 border border-gray-200 dark:border-white/[0.05] shadow-sm transform-gpu">
                         {/* <span className="text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider">{username || "User"}</span> */}
-                        <span className="text-gray-800 dark:text-gray-300 text-sm font-medium">{msg.message}</span>
+                        <span className="text-gray-800 dark:text-gray-300 text-xs md:text-sm font-medium">{msg.message}</span>
                     </div>
                     <div className="text-[10px] text-gray-400 dark:text-gray-600 font-mono">
                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -33,7 +33,7 @@ const ChatMessage = memo(({ msg, sessionStartTime, scrollToBottomInstant, isLate
             ) : (
                 <div className="relative pl-6 mb-8 before:absolute before:left-2 before:w-px before:bg-gradient-to-b before:from-indigo-300 dark:before:from-indigo-500/50 before:to-transparent">
                     <div className="p-6 rounded-3xl border overflow-hidden relative bg-white dark:bg-[#0a0a0c] border-gray-200 dark:border-white/[0.06] shadow-sm transform-gpu">
-                        <div className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-200 tracking-wide markdown-content">
+                        <div className="text-[13px] md:text-[15px] leading-relaxed text-gray-700 dark:text-gray-200 tracking-wide markdown-content">
                             {msg.content_type == 'text' &&
                                 <Suspense fallback={<LoadingFallback fullScreen={false} message="Loading markup response..." />}>
                                     <TypewriterMarkdown

@@ -27,11 +27,11 @@ const ProjectsCard = ({ projects = [], animate = false, onAnimationComplete }: P
               ${animate ? "animate-card-popup opacity-0" : ""}
             `}
           >
-            <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+            <h3 className="text-sm md:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
               {project.title}
             </h3>
 
-            <p className="mt-2 text-sm text-gray-600 line-clamp-2 leading-relaxed">
+            <p className="mt-2 text-xs md:text-sm text-gray-600 line-clamp-2 leading-relaxed">
               {project.description}
             </p>
 
