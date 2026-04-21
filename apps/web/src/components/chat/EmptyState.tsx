@@ -4,11 +4,19 @@ const EmptyState = memo(() => (
     <div id="chat-empty-state" className="flex flex-col items-center font-mono justify-center h-full px-4 sm:px-6 text-center animate-in fade-in duration-700">
         <div className="relative mb-6 sm:mb-8">
             <div className="absolute inset-0 bg-indigo-200 dark:bg-indigo-500 blur-3xl opacity-40 dark:opacity-20 rounded-full" />
-            <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-2xl sm:rounded-3xl overflow-hidden bg-white/50 dark:bg-gradient-to-b dark:from-white/10 dark:to-white/5 border border-indigo-100 dark:border-white/10 flex items-center justify-center shadow-xl dark:shadow-2xl relative group text-center">
+            <div className="relative h-20 w-20 sm:h-24 sm:w-24">
+                {/* Light (scaled up) */}
                 <img
-                    src="/action-board.png"
-                    alt="Action Board Graphic"
-                    className="w-full h-full object-contain p-2 sm:p-0 transition-transform duration-500 group-hover:scale-110 drop-shadow-lg"
+                    src="/bot_logo_light.png"
+                    alt="Bot Logo"
+                    className="absolute inset-0 w-full h-full object-contain dark:opacity-0 transition-opacity duration-200"
+                />
+
+                {/* Dark (normal) */}
+                <img
+                    src="/bot_logo_dark.png"
+                    alt="Bot Logo"
+                    className="absolute inset-0 w-full h-full scale-[1.10] object-contain opacity-0 dark:opacity-100 transition-opacity duration-200"
                 />
             </div>
         </div>
