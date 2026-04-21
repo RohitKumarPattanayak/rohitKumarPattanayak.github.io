@@ -116,7 +116,7 @@ export const ChatPage = () => {
                                 <div className="p-6 rounded-3xl border overflow-hidden relative bg-white/50 dark:bg-white/[0.01] border-indigo-200 dark:border-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.1)] dark:shadow-[0_0_30px_rgba(99,102,241,0.05)]">
                                     <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400">
                                         <div className="w-4 h-4 rounded-full border-2 border-indigo-300 dark:border-indigo-500/30 border-t-indigo-600 dark:border-t-indigo-500 animate-spin" />
-                                        <span className="text-sm font-mono tracking-wide animate-pulse">Processing execution cluster...</span>
+                                        <span className="text-sm font-mono tracking-wide animate-pulse">Generating smart insights…</span>
                                     </div>
                                 </div>
                             </div>
