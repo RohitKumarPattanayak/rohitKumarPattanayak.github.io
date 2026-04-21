@@ -28,11 +28,16 @@ const Skillscard = ({ skills = [], animate = false, onAnimationComplete }: Skill
                         px-3 py-1.5
                         text-xs md:text-sm font-medium
                         bg-neutral-100
+                        dark:bg-neutral-800
                         text-gray-700
+                        dark:text-gray-300
                         border border-neutral-200
+                        dark:border-neutral-700
                         rounded-full
                         hover:bg-blue-50
+                        dark:hover:bg-blue-900
                         hover:border-blue-200
+                        dark:hover:border-blue-700
                         hover:text-blue-700
                         ${animate ? "animate-skill-pop opacity-0" : ""}
                     `}
