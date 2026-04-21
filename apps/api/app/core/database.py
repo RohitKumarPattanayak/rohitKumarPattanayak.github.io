@@ -38,11 +38,11 @@ PrimaryAsyncSessionLocal = async_sessionmaker(
     expire_on_commit=False
 )
 
-ReplicaAsyncSessionLocal = async_sessionmaker(
-    replica_engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+# ReplicaAsyncSessionLocal = async_sessionmaker(
+#     replica_engine,
+#     class_=AsyncSession,
+#     expire_on_commit=False
+# )
 
 # Backward-compatible aliases for older imports.
 engine = primary_engine

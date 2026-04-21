@@ -2,7 +2,7 @@ from app.services.jwt_service import JwtService
 from fastapi import HTTPException, APIRouter, Depends, Query, Response, Request
 from app.core.logger import logger
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.dependencies import get_db_read, get_db_write
+from app.core.dependencies import get_db_write
 from app.models.schema.user_schema import UserMode, UserResponse, CreateUserRequest, PaginatedUserResponse
 from app.services.user_service import UserService
 
@@ -57,7 +57,7 @@ async def fetch_all_users(
     offset: int | None = Query(default=None, ge=0),
     limit: int | None = Query(default=None, ge=1),
     search: str | None = Query(default=None),
-    session: AsyncSession = Depends(get_db_read)
+    session: AsyncSession = Depends(get_db_write)
 ):
     try:
         service = UserService(session)
@@ -174,7 +174,7 @@ async def get_logged_user(req: Request):
 
 
 @router.get("/get_user_by_id", response_model=UserResponse)
-async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db_read)):
+async def get_user_by_id(user_id: int, session: AsyncSession = Depends(get_db_write)):
     try:
         service = UserService(session)
         user = await service.get_user_by_id(user_id)

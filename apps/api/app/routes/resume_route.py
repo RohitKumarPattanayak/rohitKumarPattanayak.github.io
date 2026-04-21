@@ -4,7 +4,7 @@ from sqlalchemy import select
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Any, Union
 
-from app.core.dependencies import get_db_read, get_db_write
+from app.core.dependencies import get_db_write
 from app.services.resume_injestion_service import ResumeIngestionService
 from app.repositories.resume_repository import ResumeRepository
 from app.models.resume_model import ResumeModel
@@ -70,7 +70,7 @@ async def upload_resume(
 
 @router.get("/")
 async def list_resumes(
-    db: AsyncSession = Depends(get_db_read),
+    db: AsyncSession = Depends(get_db_write),
     isActive: bool = Query(default=None, ge=False)
 ):
     try:
@@ -178,7 +178,7 @@ async def delete_resume(resume_id: int, db: AsyncSession = Depends(get_db_write)
 async def get_resume_by_id(
     resume_id: int,
     sections: str = Query(None, description="Comma separated list of sections to filter, e.g. projects,skills"),
-    db: AsyncSession = Depends(get_db_read)
+    db: AsyncSession = Depends(get_db_write)
 ):
     try:
         resume_result = await db.execute(

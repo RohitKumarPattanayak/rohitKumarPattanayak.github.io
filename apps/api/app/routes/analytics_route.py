@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from app.core.dependencies import get_db_read
+from app.core.dependencies import get_db_write
 from app.models.ai_usage_model import AIUsageModel
 from app.core.logger import logger
 
@@ -9,7 +9,7 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 
 @router.get("/usage")
-async def usage_summary(db: AsyncSession = Depends(get_db_read)):
+async def usage_summary(db: AsyncSession = Depends(get_db_write)):
     try:
         result = await db.execute(
             select(

@@ -1,12 +1,13 @@
-from app.core.database import PrimaryAsyncSessionLocal, ReplicaAsyncSessionLocal
+from app.core.database import PrimaryAsyncSessionLocal
+# , ReplicaAsyncSessionLocal
 
 async def get_db_write():
     async with PrimaryAsyncSessionLocal() as session:
         yield session
 
-async def get_db_read():
-    async with ReplicaAsyncSessionLocal() as session:
-        yield session
+# async def get_db_write():
+#     async with ReplicaAsyncSessionLocal() as session:
+#         yield session
 
 # Backward-compatible alias.
 get_db = get_db_write

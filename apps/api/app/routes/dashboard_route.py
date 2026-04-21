@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.core.dependencies import get_db_read
+from app.core.dependencies import get_db_write
 from app.models.resume_chunk_model import ResumeChunkModel
 from app.repositories.resume_repository import ResumeRepository
 from app.core.logger import logger
@@ -10,7 +10,7 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
 @router.get("/")
-async def list_projects(db: AsyncSession = Depends(get_db_read)):
+async def list_projects(db: AsyncSession = Depends(get_db_write)):
     try:
         repo = ResumeRepository(db)
         active_resume = await repo.get_active_resume()
@@ -53,7 +53,7 @@ async def list_projects(db: AsyncSession = Depends(get_db_read)):
 
 
 @router.get("/portfolio")
-async def get_portfolio(db: AsyncSession = Depends(get_db_read)):
+async def get_portfolio(db: AsyncSession = Depends(get_db_write)):
     try:
         repo = ResumeRepository(db)
         active_resume = await repo.get_active_resume()
@@ -89,7 +89,7 @@ async def get_portfolio(db: AsyncSession = Depends(get_db_read)):
 
 
 @router.get("/{project_id}")
-async def get_project(project_id: int, db: AsyncSession = Depends(get_db_read)):
+async def get_project(project_id: int, db: AsyncSession = Depends(get_db_write)):
 
     try:
         repo = ResumeRepository(db)
