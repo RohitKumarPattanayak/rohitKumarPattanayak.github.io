@@ -199,7 +199,7 @@ const SignUpView = memo(({ onCancel }: { onCancel: () => void }) => {
     if (!username.trim()) return
     const user = await createMutation({ username, mode }) as UserItem
     setUser(user.id, user.username, user.mode)
-    navigate("/dashboard/chat")
+    navigate("/dashboard")
   }, [createMutation, mode, navigate, setUser, username])
 
   const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
