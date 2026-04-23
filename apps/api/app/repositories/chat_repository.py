@@ -71,18 +71,18 @@ class ChatRepository:
         try:
             activeResume = await self.resume_repo.get_active_resume()
             user_repo = UserRepository(self.session)
-            user = await user_repo.get_by_id(user_id)
+            # user = await user_repo.get_by_id(user_id)
             
-            if user and user.username == "guest":
-                await self.session.execute(
-                    delete(ChatMessageModel).where(
-                        ChatMessageModel.user_id == user_id,
-                        ChatMessageModel.resume_id == activeResume.id
-                    )
-                )
-                await self.session.commit()
-                logger.info(f"cleanup_old_messages - user_id={user_id} - guest user, cleared all chat")
-                return
+            # if user and user.username == "guest":
+            #     await self.session.execute(
+            #         delete(ChatMessageModel).where(
+            #             ChatMessageModel.user_id == user_id,
+            #             ChatMessageModel.resume_id == activeResume.id
+            #         )
+            #     )
+            #     await self.session.commit()
+            #     logger.info(f"cleanup_old_messages - user_id={user_id} - guest user, cleared all chat")
+            #     return
             
             # Find the timestamp of the (keep_count)th latest message
             result = await self.session.execute(

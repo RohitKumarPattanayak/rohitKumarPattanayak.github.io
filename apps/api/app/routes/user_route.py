@@ -103,7 +103,6 @@ async def login_user(
                     mode=UserMode.recruiter
                 )
             authenticate_set_cookie(user, res)
-            print("user", user)
             return user
             
         service = UserService(session)
