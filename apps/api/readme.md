@@ -57,3 +57,9 @@ What Is HNSW Index?
 - npm install @tanstack/react-query zustand react-router-dom recharts axios @tanstack/react-query-devtools
 - npm install -D tailwindcss postcss autoprefixer
 - npx tailwindcss init -p
+
+
+6) Lambda Deployment :
+ <!-- Windows Git Bash Quirk (Just a heads up)
+Since you are on Windows, if you run this in Git Bash, sometimes Git Bash attempts to translate Windows paths in Docker commands and breaks the -v "$PWD" mount. If you see an error like invalid volume specification: 'C:/Program Files/Git/var/task', run your script by prepending MSYS_NO_PATHCONV=1: -->
+- MSYS_NO_PATHCONV=1 ./build_lambda.sh

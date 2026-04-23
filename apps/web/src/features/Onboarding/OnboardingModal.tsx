@@ -193,7 +193,7 @@ const SignUpView = memo(({ onCancel }: { onCancel: () => void }) => {
 
   const setUser = useUserStore((s) => s.setUser)
   const navigate = useNavigate()
-  const { mutateAsync: createMutation, isPending, isError, error } = onboardingCreateUser()
+  const { mutateAsync: createMutation, isPending, isError } = onboardingCreateUser()
 
   const handleCreate = useCallback(async () => {
     if (!username.trim()) return

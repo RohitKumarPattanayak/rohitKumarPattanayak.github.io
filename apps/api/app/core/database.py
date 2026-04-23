@@ -25,12 +25,20 @@ REPLICA_DATABASE_URL = _build_database_url("POSTGRES_REPLICA")
 primary_engine = create_async_engine(
     PRIMARY_DATABASE_URL,
     echo=False,  # Switched off sqlalchemy logs
+    connect_args={
+        "statement_cache_size": 0,
+        "prepared_statement_cache_size": 0,
+    },
+    pool_pre_ping=True,
+    pool_size=2,
+    max_overflow=3,
+    pool_recycle=300,
 )
 
-replica_engine = create_async_engine(
-    REPLICA_DATABASE_URL,
-    echo=False,  # Switched off sqlalchemy logs
-)
+# replica_engine = create_async_engine(
+#     REPLICA_DATABASE_URL,
+#     echo=False,  # Switched off sqlalchemy logs
+# )
 
 PrimaryAsyncSessionLocal = async_sessionmaker(
     primary_engine,

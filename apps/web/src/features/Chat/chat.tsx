@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from "react";
 import { useUserStore } from "../../store/user.store";
-import { useActiveResumeStore } from "../../store/active_resume.store";
-import { onboardingFetchActiveResume } from "../../react-queries/OnboardingQueries";
 import { chatResponseMutation, getChatConversationQuery } from "../../react-queries/ChatQueries";
 import { useQueryClient } from "@tanstack/react-query";
 import ChatMessage from "../../components/chat/ChatMessage";

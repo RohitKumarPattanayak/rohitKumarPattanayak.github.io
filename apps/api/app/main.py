@@ -2,8 +2,10 @@ from app.middleware.basic_auth_middleware import AuthMiddleware
 from dotenv import load_dotenv
 from fastapi import FastAPI
 import uvicorn
+from mangum import Mangum
 import os
-from app.core.database import Base, primary_engine, replica_engine
+from app.core.database import Base, primary_engine 
+# replica_engine
 from app.routes import dashboard_route, chat_route, resume_route, health_route, analytics_route, test_route, user_route
 from fastapi.middleware.cors import CORSMiddleware
 from app.middleware.logging_middleware import LoggingMiddleware
@@ -31,7 +33,7 @@ async def lifespan(app: FastAPI):
         yield  # this is required for lifespan function so it could let it proceed like for the async context manager
         # shutdown
         await primary_engine.dispose()
-        await replica_engine.dispose()
+        # await replica_engine.dispose()
         logger.info("shutdown - DB connection closed")
     except Exception as e:
         logger.error("startup - Error occurred", exc_info=True)
@@ -56,7 +58,7 @@ app.add_middleware(LoggingMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "https://rohitkp.dev"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -83,6 +85,7 @@ def root():
 #         logger.error("startup - Error occurred", exc_info=True)
 #         raise
 
+handler = Mangum(app, lifespan="auto")
 
 if __name__ == "__main__":
     uvicorn.run(
