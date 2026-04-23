@@ -345,7 +345,7 @@ const OnboardingModal = () => {
   useEffect(() => {
     if (!loggedUser) return
     setUser(loggedUser.id, loggedUser.username, loggedUser.mode)
-    navigate("/dashboard/chat")
+    navigate("/dashboard")
   }, [loggedUser, setUser, navigate])
 
   const handleModeSelect = useCallback((v: 'welcome' | 'signup' | 'login' | 'hidden') => setView(v), [])

@@ -130,7 +130,7 @@ const DashboardLayout = () => {
             <span className="text-sm">Explore My Work</span>
           </NavLink>
           <NavLink
-            to="/dashboard/chat"
+            to="/dashboard"
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-2xl group ${isActive ? "bg-white dark:bg-white/[0.08] text-indigo-700 dark:text-white border border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-lg dark:shadow-black/20 font-medium" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.03]"
               }`
