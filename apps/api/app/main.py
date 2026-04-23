@@ -26,9 +26,12 @@ from sqlalchemy import text
 async def lifespan(app: FastAPI):
     try:
         async with primary_engine.begin() as conn:
-            # the below is for activating pgvector extension in postgres
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-            await conn.run_sync(Base.metadata.create_all)
+            # Note: Running DDL (table creation) on every Lambda cold start adds
+            # significant latency and can cause timeout 500 errors (which look like CORS errors).
+            # I have commented these out. You should run these manually or via alembic instead.
+            # await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+            # await conn.run_sync(Base.metadata.create_all)
+            pass
         logger.info("startup - Database tables created successfully")
         yield  # this is required for lifespan function so it could let it proceed like for the async context manager
         # shutdown
@@ -58,7 +61,13 @@ app.add_middleware(LoggingMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "https://rohitkp.dev"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "https://rohitkp.dev",
+        "https://www.rohitkp.dev"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
