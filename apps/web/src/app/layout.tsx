@@ -89,7 +89,7 @@ const DashboardLayout = () => {
 
       {/* Sidebar - Heavily Glassmorphic & Responsive */}
       <aside
-        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white sm:bg-white/70 font-mono dark:border-white/[0.1] dark:bg-black sm:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${isMounted ? "transition-transform duration-300 ease-in-out" : ""
+        className={`fixed md:relative flex-shrink-0 w-[260px] h-full border-r border-gray-200 bg-white sm:bg-white/70 font-mono dark:border-white/[0.1] dark:bg-black sm:bg-black/40 flex flex-col items-center py-8 pb-6 z-30 ${isMounted ? "transition-transform duration-300 ease-in-out" : "transition-none"
           } ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:hidden"}`}
       >
         <div className="mb-10 px-6 w-full flex items-center justify-between gap-4">
