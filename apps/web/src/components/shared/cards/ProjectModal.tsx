@@ -35,11 +35,11 @@ const ProjectModal = ({ project, onClose }: ProjectModalProps) => {
       >
         {/* Header / Image Area */}
         {project.project_pic && (
-          <div className="relative w-full h-32 sm:h-48 bg-slate-50 flex items-center justify-center shrink-0 border-b border-slate-100 overflow-hidden">
+          <div className="relative w-full h-32 sm:h-48 bg-slate-50 flex items-center justify-center shrink-0 border-b border-slate-100 overflow-hidden px-1 py-3">
             <img
               src={project.project_pic}
               alt={project.title}
-              className="w-full h-full object-cover opacity-90"
+              className="max-w-full max-h-full object-contain"
             />
           </div>
         )}

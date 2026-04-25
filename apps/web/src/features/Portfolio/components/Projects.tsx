@@ -34,12 +34,14 @@ const Projects = memo(({ data }: ProjectsProps) => {
                     <h4 className="text-[10px] md:text-sm font-medium text-gray-500 uppercase tracking-widest">{company}</h4>
                   </div>
                   {project_pic && (
-                    <img
-                      src={project_pic}
-                      alt={title}
-                      loading="lazy"
-                      className="w-12 h-12 md:w-16 md:h-16 object-cover rounded-xl border border-gray-100 dark:border-gray-800 shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-105"
-                    />
+                    <div className="w-12 h-12 md:w-16 md:h-16 p-1 flex items-center justify-center rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-black shrink-0 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                      <img
+                        src={project_pic}
+                        alt={title}
+                        loading="lazy"
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
                   )}
                 </div>
 
