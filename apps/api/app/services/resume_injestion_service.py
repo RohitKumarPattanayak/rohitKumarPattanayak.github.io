@@ -220,6 +220,17 @@ class ResumeIngestionService:
                          merged_data.update(data)
                          data = merged_data
                          break
+        elif section == "experience":
+             # Use the 'title' key to uniquely identify which project we're manually querying
+             if isinstance(data, dict) and "company" in data:
+                 for chunk in existing_chunks:
+                     if chunk.meta_data and chunk.meta_data.get("company") == data["company"]:
+                         target_chunk_id = chunk.id
+                         # Merge new keys over existing project mapping
+                         merged_data = chunk.meta_data.copy()
+                         merged_data.update(data)
+                         data = merged_data
+                         break
         elif section in ["resume_owner_pic", "personal_info", "social_links", "introduction"]:
              if existing_chunks:
                  target_chunk_id = existing_chunks[0].id

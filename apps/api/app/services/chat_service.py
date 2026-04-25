@@ -77,6 +77,9 @@ class ChatService:
                     ResumeChunkModel.resume_id == active_resume.id,
                     ResumeChunkModel.section == "projects"
                 )
+                .order_by(
+                    ResumeChunkModel.id.asc()
+                )
             )
 
             projects = result.scalars().all()
